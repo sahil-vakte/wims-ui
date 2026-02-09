@@ -97,7 +97,7 @@ export default function AdminSidebar() {
   {[
     { text: "Colors Library", icon: <DashboardIcon />, path: "/admin-user/colors-library" },
     { text: "Products", icon: <ProductionQuantityLimitsIcon />, path: "/admin-user/products" },
-    { text: "Locations", icon: <LocationOnIcon />, path: "/admin-user/companies" },
+    { text: "Locations", icon: <LocationOnIcon />, path: "/admin-user/locations" },
     { text: "Suppliers", icon: <CalendarMonthIcon />, path: "/admin-user/employees" },
     { text: "Stock Batches", icon: <LocalHospitalIcon />, path: "/admin-user/appointments" },
     { text: "Orders", icon: <ViewListIcon />, path: "/admin-user/orders" },
@@ -133,9 +133,13 @@ export default function AdminSidebar() {
       <Collapse in={openSection === 'clinic'} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
           {[
-            { text: "Doctors", path: "/provider/all-doctors", icon: <MasksIcon /> },
-            { text: "Clinic Services", path: "/provider/clinic-services", icon: <HealingIcon /> },
-            { text: "Pharmacy", path: "/provider/pharmacy-management", icon: <LocalPharmacyIcon /> },
+            { text: "Colors Library", icon: <DashboardIcon />, path: "/admin-user/colors-library" },
+    { text: "Products", icon: <ProductionQuantityLimitsIcon />, path: "/admin-user/products" },
+    { text: "Locations", icon: <LocationOnIcon />, path: "/admin-user/locations" },
+    { text: "Suppliers", icon: <CalendarMonthIcon />, path: "/admin-user/employees" },
+    { text: "Stock Batches", icon: <LocalHospitalIcon />, path: "/admin-user/appointments" },
+    { text: "Orders", icon: <ViewListIcon />, path: "/admin-user/orders" },
+    { text: "Employees", icon: <BadgeIcon />, path: "/admin-user/customers" }
           ].map((item) => (
             <ListItemButton
               key={item.text}
