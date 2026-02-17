@@ -17,7 +17,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 // import ClinicLogo from "../../Assets/WIMS_Logo_White.png";
-import ClinicLogo from "../../Assets/darklogonew.png";
+import ClinicLogo from "../../Assets/WIMS_Logo_White.png";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";

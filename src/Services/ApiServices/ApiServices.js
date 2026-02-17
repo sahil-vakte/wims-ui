@@ -210,7 +210,7 @@ class ApiService {
   };
   patch = async (url, payload={}, headers = {}) => {
     try {
-      const response = await axios.put(
+      const response = await axios.patch(
         process.env.REACT_APP_SERVERURL + url,
         payload,
         {

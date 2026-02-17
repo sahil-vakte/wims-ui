@@ -11,7 +11,7 @@ import Box from "@mui/material/Box";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import format from "date-fns/format";
 import enUS from "date-fns/locale/en-US"; 
-import ClinicLogo from "../../Assets/logo.jpg"
+import ClinicLogo from "../../Assets/WIMS_Logo_White.png"
 import { ExitToApp } from '@mui/icons-material';
 import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,useTheme } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
