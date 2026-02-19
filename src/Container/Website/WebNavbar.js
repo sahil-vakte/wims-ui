@@ -74,7 +74,7 @@ const WebNavbar = () => {
     { name: 'Services', path: '/services' },
     { name: 'Testimonials', path: '/testimonials' },
     { name: 'Contact', path: '/contact' },
-    { name: 'FAQ', path: '/faq' },
+    { name: 'FAQS', path: '/faq' },
   ];
 
   const drawer = (
