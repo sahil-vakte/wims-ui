@@ -10,6 +10,7 @@ import OrderProcessing from '../../Components/AdminUser/Orders/OrderProcessing'
 import LocationsList from '../../Components/AdminUser/Locations/LocationsList'
 import EmployeesList from '../../Components/AdminUser/Employees/EmployeesList'
 import OrderLabel from '../../Components/AdminUser/Orders/OrderLabel'
+import OrderLabelTest from '../../Components/AdminUser/Orders/OrderLabelTest'
 
 
 const AdminRoutes = () => {
@@ -29,6 +30,7 @@ const AdminRoutes = () => {
           <Route path="/locations"  element={<LocationsList/>}/>
           <Route path="/employees"  element={<EmployeesList/>}/>
           <Route path="/order-label"  element={<OrderLabel/>}/>
+          <Route path="/order-label-test"  element={<OrderLabelTest/>}/>
           
       </Routes>
     </div>
