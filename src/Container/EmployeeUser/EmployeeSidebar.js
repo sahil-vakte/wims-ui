@@ -69,7 +69,7 @@ export default function EmployeeSidebar() {
       localStorage.clear();
       setLoading(false);
       setOpenLogoutDialog(false);
-      navigate("/staff-login");
+      navigate("/");
     }, 2000);
   };
 

@@ -67,7 +67,7 @@ export default function AdminSidebar() {
       localStorage.clear();
       setLoading(false);
       setOpenLogoutDialog(false);
-      navigate("/staff-login");
+      navigate("/");
     }, 2000);
   };
 
@@ -98,10 +98,9 @@ export default function AdminSidebar() {
     { text: "Colors Library", icon: <DashboardIcon />, path: "/admin-user/colors-library" },
     { text: "Products", icon: <ProductionQuantityLimitsIcon />, path: "/admin-user/products" },
     { text: "Locations", icon: <LocationOnIcon />, path: "/admin-user/locations" },
-    { text: "Suppliers", icon: <CalendarMonthIcon />, path: "/admin-user/employees" },
-    { text: "Stock Batches", icon: <LocalHospitalIcon />, path: "/admin-user/appointments" },
     { text: "Orders", icon: <ViewListIcon />, path: "/admin-user/orders" },
-    { text: "Employees", icon: <BadgeIcon />, path: "/admin-user/customers" }
+    { text: "Employees", icon: <BadgeIcon />, path: "/admin-user/employees" },
+    { text: "Order Label", icon: <ViewListIcon />, path: "/admin-user/order-label" },
   ].map((item) => (
     <ListItem
       key={item.text}
@@ -139,7 +138,9 @@ export default function AdminSidebar() {
     { text: "Suppliers", icon: <CalendarMonthIcon />, path: "/admin-user/employees" },
     { text: "Stock Batches", icon: <LocalHospitalIcon />, path: "/admin-user/appointments" },
     { text: "Orders", icon: <ViewListIcon />, path: "/admin-user/orders" },
-    { text: "Employees", icon: <BadgeIcon />, path: "/admin-user/customers" }
+    { text: "Employees", icon: <BadgeIcon />, path: "/admin-user/employees" },
+    { text: "Order Label", icon: <ViewListIcon />, path: "/admin-user/order-label" },
+
           ].map((item) => (
             <ListItemButton
               key={item.text}

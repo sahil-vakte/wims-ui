@@ -8,6 +8,8 @@ import ProductsList from '../../Components/AdminUser/Products/ProductsList'
 import OrdersList from '../../Components/AdminUser/Orders/OrdersList'
 import OrderProcessing from '../../Components/AdminUser/Orders/OrderProcessing'
 import LocationsList from '../../Components/AdminUser/Locations/LocationsList'
+import EmployeesList from '../../Components/AdminUser/Employees/EmployeesList'
+import OrderLabel from '../../Components/AdminUser/Orders/OrderLabel'
 
 
 const AdminRoutes = () => {
@@ -25,6 +27,8 @@ const AdminRoutes = () => {
           <Route path="/orders"  element={<OrdersList/>}/>
           <Route path="/order-processing/:id"  element={<OrderProcessing/>}/>
           <Route path="/locations"  element={<LocationsList/>}/>
+          <Route path="/employees"  element={<EmployeesList/>}/>
+          <Route path="/order-label"  element={<OrderLabel/>}/>
           
       </Routes>
     </div>

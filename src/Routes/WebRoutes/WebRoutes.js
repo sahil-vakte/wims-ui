@@ -8,10 +8,10 @@ import AdminLogin from "../../Components/LoginPage/AdminLogin";
 const WebRoutes = () => {
   return (
     <div>
-      <WebNavbar />
+      {/* <WebNavbar /> */}
       <Routes>
-        <Route path="/" element={<HomePage/>} />
-        <Route path="/login" element={<LoginPage/>} />
+        {/* <Route path="/" element={<HomePage/>} /> */}
+        <Route path="/" element={<LoginPage/>} />
         <Route path="/admin-login" element={<AdminLogin/>} />
       </Routes>
     </div>
