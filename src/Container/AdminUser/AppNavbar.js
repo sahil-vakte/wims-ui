@@ -57,7 +57,7 @@ function AppNavbar({ toggleDrawer }) {
         navigate('/');
       }
       else{
-        navigate('/provider-emr-login');
+        navigate('/');
       }
     }, 3000);
   };

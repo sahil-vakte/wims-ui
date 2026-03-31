@@ -1219,7 +1219,42 @@ const ProductsList = () => {
       <Typography variant="h6" fontWeight={700}>
         Products
       </Typography>
+<Box
+  sx={{
+    display: "flex",
+    alignItems: "center",
+    gap: 2,
+    mb: 2,
+  }}
+>
+  <TextField
+    size="small"
+    placeholder="Search by SKU or Product Title..."
+    value={search}
+    onChange={(e) => {
+      setSearch(e.target.value);
+      setPage(0); // reset to first page
+    }}
+    InputProps={{
+      startAdornment: (
+        <InputAdornment position="start">
+          <SearchIcon />
+        </InputAdornment>
+      ),
+    }}
+    sx={{ width: 350 }}
+  />
 
+  <Button
+    variant="outlined"
+    onClick={() => {
+      setSearch("");
+      setPage(0);
+    }}
+  >
+    Clear
+  </Button>
+</Box>
       <DataGrid
         rows={rows}
         columns={columns}

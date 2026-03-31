@@ -72,22 +72,65 @@ const OrdersList = () => {
     fetchOrders();
   }, []);
 const getItemQrUrl = (orderId, itemId) =>
-  `http://192.168.1.5:3001/employee-user/order-process-item/${orderId}/${itemId}`;
+  `http://wims.cloud/employee-user/order-process-item/${orderId}/${itemId}`;
 
-  const fetchOrders = async () => {
-    setLoading(true);
-    setError("");
+  // const fetchOrders = async () => {
+  //   setLoading(true);
+  //   setError("");
+  //   try {
+  //     const res = await ApiServices.get("orders/", headers);
+  //     const results = Array.isArray(res?.data?.results) ? res.data.results : [];
+  //     setOrders(results);
+  //     setCount(res?.data?.count ?? results.length);
+  //   } catch (err) {
+  //     setError("Failed to load orders");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
+const fetchOrders = async () => {
+  setLoading(true);
+  setError("");
+
+  try {
+    // 🔹 Step 1: Try import API (but don't block flow)
     try {
-      const res = await ApiServices.get("orders/", headers);
-      const results = Array.isArray(res?.data?.results) ? res.data.results : [];
-      setOrders(results);
-      setCount(res?.data?.count ?? results.length);
-    } catch (err) {
-      setError("Failed to load orders");
-    } finally {
-      setLoading(false);
+      const importRes = await ApiServices.get(
+        "orders/import_from_remote_tiaknightfabrics/",
+        headers
+      );
+
+      console.log("Import API response:", importRes);
+
+      // Optional: check success via response message instead of status
+      if (importRes?.data?.message) {
+        console.log("Import success:", importRes.data.message);
+      }
+
+    } catch (importError) {
+      // ❗ Don't stop execution
+      console.warn("Import API failed, continuing...", importError);
     }
-  };
+
+    // 🔹 Step 2: ALWAYS call orders API
+    const res = await ApiServices.get("orders/", headers);
+
+    const results = Array.isArray(res?.data?.results)
+      ? res.data.results
+      : [];
+
+    setOrders(results);
+    setCount(res?.data?.count ?? results.length);
+
+  } catch (err) {
+    console.error(err);
+    setError("Failed to load orders");
+  } finally {
+    setLoading(false);
+  }
+};
 
   /* ---------------- FILTER ---------------- */
   const filteredOrders = useMemo(() => {
@@ -394,6 +437,7 @@ const getItemQrUrl = (orderId, itemId) =>
                       <TableCell align="center">Qty</TableCell>
                       <TableCell>Unit Price</TableCell>
                       <TableCell>Total</TableCell>
+                      <TableCell>Location</TableCell>
                       <TableCell align="center">QR</TableCell>
                     </TableRow>
                   </TableHead>
@@ -405,10 +449,27 @@ const getItemQrUrl = (orderId, itemId) =>
                         <TableCell align="center">{item.quantity}</TableCell>
                         <TableCell>£{item.unit_price}</TableCell>
                         <TableCell>£{item.line_total}</TableCell>
+                        <TableCell>
+  <Box>
+    {/* Product Name */}
+
+
+    {/* Locations */}
+    <Typography variant="caption" color="text.secondary">
+      Primary: {item?.stock_detail?.primary_location || "NA"}
+    </Typography>
+
+    <br />
+
+    <Typography variant="caption" color="text.secondary">
+      Secondary: {item?.stock_detail?.secondary_location || "NA"}
+    </Typography>
+  </Box>
+</TableCell>
                         <TableCell align="center">
             <QRCodeCanvas
               value={getItemQrUrl(selectedOrder.id, item.id)}
-              size={80}
+              size={100}
               level="H"
               includeMargin
             />
