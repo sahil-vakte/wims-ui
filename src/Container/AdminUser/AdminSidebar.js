@@ -309,7 +309,8 @@ const adminGroups = [
   },
 ];
 
-export default function AdminSidebar({ collapsed, onToggleCollapsed }) {
+export default function AdminSidebar({ collapsed, onToggleCollapsed, mobileOpen, 
+  setMobileOpen  }) {
   const isLargeScreen = useMediaQuery('(min-width:1441px)');
   const location = useLocation();
   const navigate = useNavigate();
@@ -317,7 +318,7 @@ export default function AdminSidebar({ collapsed, onToggleCollapsed }) {
   const role = getDecryptedUserType();
   const fullName = `${user?.fname || ''} ${user?.lname || ''}`.trim();
 
-  const [mobileOpen, setMobileOpen] = useState(false);
+  // const [mobileOpen, setMobileOpen] = useState(false);
   const [openSection, setOpenSection] = useState('clinic');
   const [search, setSearch] = useState('');
   const [openLogout, setOpenLogout] = useState(false);
@@ -464,7 +465,7 @@ export default function AdminSidebar({ collapsed, onToggleCollapsed }) {
 
   return (
     <>
-      {!isLargeScreen && <AppNavbar onMenuClick={() => setMobileOpen(true)} />}
+      {/* {!isLargeScreen && <AppNavbar onMenuClick={() => setMobileOpen(true)} />} */}
       {isLargeScreen ? (
         <Drawer variant="permanent" open PaperProps={{ sx: { width, border: 0, background: 'transparent', overflow: 'hidden' } }}>
           {drawerBody}

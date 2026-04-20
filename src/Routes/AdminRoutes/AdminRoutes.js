@@ -44,30 +44,53 @@ const TopBar = ({ onMenuClick }) => {
 
 const AdminRoutes = () => {
   const isLargeScreen = useMediaQuery("(min-width:1441px)");
-const [collapsed, setCollapsed] = useState(false);
+
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false); // ✅ NEW
+
   return (
-    <div>
-          <div>
-      <AdminSidebar />
-      <div style={{ marginLeft: isLargeScreen ? '250px' : '0', flexGrow: 1, padding: "10px" }}>
-<TopBar onMenuClick={() => setCollapsed(c => !c)} />
-      <Routes>
-          <Route path="/colors-library"  element={<ColorsList/>}/>
-          <Route path="/products"  element={<ProductsList/>}/>
-          <Route path="/orders"  element={<OrdersList/>}/>
-          <Route path="/order-processing/:id"  element={<OrderProcessing/>}/>
-          <Route path="/locations"  element={<LocationsList/>}/>
-          <Route path="/employees"  element={<EmployeesList/>}/>
-          <Route path="/order-label"  element={<OrderLabel/>}/>
-          <Route path="/order-label-test"  element={<OrderLabelTest/>}/>
-          <Route path="/order-process-item/:orderId/:itemId"  element={<OrderProcessByItem/>}/>
-          
-      </Routes>
-    </div>
-    </div>
-    </div>
-  )
-}
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+      
+      <AdminSidebar
+        collapsed={collapsed}
+        onToggleCollapsed={() => setCollapsed(prev => !prev)}
+        mobileOpen={mobileOpen}                // ✅ PASS
+        setMobileOpen={setMobileOpen}          // ✅ PASS
+      />
+
+      <Box
+        sx={{
+          flexGrow: 1,
+          ml: isLargeScreen ? (collapsed ? "72px" : "260px") : 0,
+        }}
+      >
+        <TopBar
+          onMenuClick={() => {
+            if (isLargeScreen) {
+              setCollapsed(prev => !prev);
+            } else {
+              setMobileOpen(true); // ✅ OPEN DRAWER
+            }
+          }}
+        />
+
+        <Box sx={{ p: 2 }}>
+          <Routes>
+            <Route path="/colors-library" element={<ColorsList />} />
+            <Route path="/products" element={<ProductsList />} />
+            <Route path="/orders" element={<OrdersList />} />
+            <Route path="/order-processing/:id" element={<OrderProcessing />} />
+            <Route path="/locations" element={<LocationsList />} />
+            <Route path="/employees" element={<EmployeesList />} />
+            <Route path="/order-label" element={<OrderLabel />} />
+            <Route path="/order-label-test" element={<OrderLabelTest />} />
+            <Route path="/order-process-item/:orderId/:itemId" element={<OrderProcessByItem />} />
+          </Routes>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
 
 export default AdminRoutes
 
