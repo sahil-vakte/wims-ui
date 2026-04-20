@@ -74,6 +74,10 @@ const OrdersList = () => {
 const getItemQrUrl = (orderId, itemId) =>
   `http://wims.cloud/employee-user/order-process-item/${orderId}/${itemId}`;
 
+const getItemQrUrlLocal = (orderId, itemId) =>
+  `http://localhost:3002/admin-user/order-process-item/${orderId}/${itemId}`;
+
+
   // const fetchOrders = async () => {
   //   setLoading(true);
   //   setError("");
@@ -466,12 +470,20 @@ const fetchOrders = async () => {
     </Typography>
   </Box>
 </TableCell>
-                        <TableCell align="center">
+                        <TableCell align="center" 
+                              onClick={() =>
+    window.open(
+      getItemQrUrlLocal(selectedOrder.id, item.id),
+      "_blank"
+    )
+  }
+                        >
             <QRCodeCanvas
               value={getItemQrUrl(selectedOrder.id, item.id)}
               size={100}
               level="H"
               includeMargin
+        
             />
           </TableCell>
                       </TableRow>

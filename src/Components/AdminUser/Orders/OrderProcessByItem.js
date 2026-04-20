@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
@@ -85,8 +86,9 @@ const OrderProcessByItem = () => {
 
       setOrder(orderData);
       setItem(foundItem);
-    } catch {
-      setError("Failed to fetch order item details.");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch order details.");
     } finally {
       setLoading(false);
     }
@@ -108,32 +110,50 @@ const OrderProcessByItem = () => {
       </Box>
     );
 
+  if (!order || !item) return null;
+
   /* ---------- UI ---------- */
 
   return (
     <>
-      <Box p={{ xs: 2, md: 4 }} maxWidth="900px" mx="auto">
+      <Box p={{ xs: 2, md: 4 }} maxWidth="1000px" mx="auto">
         <Typography variant="h4" fontWeight={800} mb={3}>
           Process Order Item
         </Typography>
 
-        {/* ORDER CONTEXT */}
+        {/* ---------- ORDER DETAILS ---------- */}
         <Section title="Order Information">
           <Grid container spacing={2}>
             <InfoRow label="Order Number" value={order.order_number} />
             <InfoRow label="External Order ID" value={order.external_order_id} />
-            <InfoRow label="Customer" value={order.customer_name} />
+            <InfoRow label="Customer Name" value={order.customer_name} />
+            <InfoRow label="Email" value={order.customer_email} />
+            <InfoRow label="Phone" value={order.customer_phone} />
+            <InfoRow label="Payment Method" value={order.payment_method} />
+            <InfoRow label="Payment Status" value={order.payment_status_display} />
+            <InfoRow label="Order Status" value={order.order_status_display} />
+            <InfoRow label="Total Amount" value={`£${order.total_amount}`} />
+            <InfoRow label="Subtotal" value={`£${order.subtotal}`} />
+            <InfoRow label="Tax Amount" value={`£${order.tax_amount}`} />
+            <InfoRow label="Shipping Cost" value={`£${order.shipping_cost}`} />
+
             <Grid item xs={12}>
-              <Chip
-                label={order.order_status_display}
-                color="info"
-                size="small"
-              />
+              <Divider sx={{ my: 1 }} />
             </Grid>
+
+            <InfoRow label="Shipping Address" value={order.shipping_address} />
+            <InfoRow label="Billing Address" value={order.billing_address} />
+
+            <Grid item xs={12}>
+              <Divider sx={{ my: 1 }} />
+            </Grid>
+
+            <InfoRow label="Order Date" value={order.order_date} />
+            <InfoRow label="Payment Reference" value={order.payment_reference} />
           </Grid>
         </Section>
 
-        {/* ITEM DETAILS */}
+        {/* ---------- ITEM DETAILS (ONLY SELECTED ITEM) ---------- */}
         <Section title="Item Details">
           <Card variant="outlined" sx={{ borderRadius: 3 }}>
             <CardContent>
@@ -150,13 +170,14 @@ const OrderProcessByItem = () => {
                 <InfoRow label="Unit Price" value={`£${item.unit_price}`} />
                 <InfoRow label="Tax Rate" value={`${item.tax_rate}%`} />
                 <InfoRow label="Line Total" value={`£${item.line_total}`} />
+                <InfoRow label="Discount" value={`£${item.discount_amount}`} />
               </Grid>
             </CardContent>
           </Card>
         </Section>
       </Box>
 
-      {/* ACTION BAR */}
+      {/* ---------- ACTION BAR ---------- */}
       <Paper
         elevation={10}
         sx={{
@@ -164,10 +185,11 @@ const OrderProcessByItem = () => {
           bottom: 0,
           borderTop: "1px solid #ddd",
           p: 2,
+          background: "#fff",
         }}
       >
         <Box
-          maxWidth="900px"
+          maxWidth="1000px"
           mx="auto"
           display="flex"
           justifyContent="flex-end"
