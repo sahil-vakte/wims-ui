@@ -68,6 +68,9 @@ const OrdersList = () => {
   const [open, setOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
+  const [orderDetails, setOrderDetails] = useState(null);
+const [detailsLoading, setDetailsLoading] = useState(false);
+
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -75,23 +78,26 @@ const getItemQrUrl = (orderId, itemId) =>
   `http://wims.cloud/employee-user/order-process-item/${orderId}/${itemId}`;
 
 const getItemQrUrlLocal = (orderId, itemId) =>
-  `http://localhost:3002/admin-user/order-process-item/${orderId}/${itemId}`;
+  `http://localhost:3000/admin-user/order-process-item/${orderId}/${itemId}`;
 
 
-  // const fetchOrders = async () => {
-  //   setLoading(true);
-  //   setError("");
-  //   try {
-  //     const res = await ApiServices.get("orders/", headers);
-  //     const results = Array.isArray(res?.data?.results) ? res.data.results : [];
-  //     setOrders(results);
-  //     setCount(res?.data?.count ?? results.length);
-  //   } catch (err) {
-  //     setError("Failed to load orders");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+const fetchOrderDetails = async (orderId) => {
+  try {
+    setDetailsLoading(true);
+
+    const res = await ApiServices.get(
+      `orders/${orderId}/`,
+      headers
+    );
+
+    setOrderDetails(res?.data || null);
+  } catch (error) {
+    console.error(error);
+    setOrderDetails(null);
+  } finally {
+    setDetailsLoading(false);
+  }
+};
 
 
 const fetchOrders = async () => {
@@ -187,10 +193,11 @@ const fetchOrders = async () => {
         <Typography
           fontWeight={600}
           sx={{ color: "primary.main", cursor: "pointer" }}
-          onClick={() => {
-            setSelectedOrder(row.raw);
-            setOpen(true);
-          }}
+        onClick={() => {
+  setSelectedOrder(row.raw);
+  setOpen(true);
+  fetchOrderDetails(row.id);
+}}
         >
           {row.external_order_id}
         </Typography>
@@ -377,7 +384,10 @@ const fetchOrders = async () => {
       {/* ---------------- DETAILS DIALOG ---------------- */}
       <Dialog
         open={open}
-        onClose={() => setOpen(false)}
+       onClose={() => {
+    setOpen(false);
+    setOrderDetails(null);
+  }}
         maxWidth="lg"
         fullWidth
       >
@@ -432,65 +442,130 @@ const fetchOrders = async () => {
                 </Grid>
               </Section>
 
-              <Section title="Order Items">
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>SKU</TableCell>
-                      <TableCell>Product</TableCell>
-                      <TableCell align="center">Qty</TableCell>
-                      <TableCell>Unit Price</TableCell>
-                      <TableCell>Total</TableCell>
-                      <TableCell>Location</TableCell>
-                      <TableCell align="center">QR</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {(selectedOrder.items || []).map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell>{item.sku}</TableCell>
-                        <TableCell>{item.product_name}</TableCell>
-                        <TableCell align="center">{item.quantity}</TableCell>
-                        <TableCell>£{item.unit_price}</TableCell>
-                        <TableCell>£{item.line_total}</TableCell>
-                        <TableCell>
-  <Box>
-    {/* Product Name */}
+             <Section title="Order Items">
+  {detailsLoading ? (
+    <Typography>Loading items...</Typography>
+  ) : (
+    <Table size="small">
+      <TableHead>
+        <TableRow>
+          <TableCell>SKU</TableCell>
+          <TableCell>Product</TableCell>
+          <TableCell align="center">Qty</TableCell>
+          <TableCell>Unit Price</TableCell>
+          <TableCell>Total</TableCell>
+          <TableCell>Status</TableCell>
+          <TableCell>Assigned To</TableCell>
+          <TableCell>Location</TableCell>
+          <TableCell align="center">QR</TableCell>
+        </TableRow>
+      </TableHead>
 
+      <TableBody>
+        {(orderDetails?.items || []).map((item) => (
+          <TableRow key={item.id}>
+            <TableCell>{item.sku || "-"}</TableCell>
 
-    {/* Locations */}
-    <Typography variant="caption" color="text.secondary">
-      Primary: {item?.stock_detail?.primary_location || "NA"}
-    </Typography>
+            <TableCell>
+              <Box>
+                <Typography fontWeight={600}>
+                  {item.product_name}
+                </Typography>
 
-    <br />
+                {item.product_type && (
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                  >
+                    {item.product_type}
+                  </Typography>
+                )}
+              </Box>
+            </TableCell>
 
-    <Typography variant="caption" color="text.secondary">
-      Secondary: {item?.stock_detail?.secondary_location || "NA"}
-    </Typography>
-  </Box>
-</TableCell>
-                        <TableCell align="center" 
-                              onClick={() =>
-    window.open(
-      getItemQrUrlLocal(selectedOrder.id, item.id),
-      "_blank"
-    )
-  }
-                        >
-            <QRCodeCanvas
-              value={getItemQrUrl(selectedOrder.id, item.id)}
-              size={100}
-              level="H"
-              includeMargin
-        
-            />
-          </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Section>
+            <TableCell align="center">
+              {item.quantity}
+            </TableCell>
+
+            <TableCell>
+              £{Number(item.unit_price || 0).toFixed(2)}
+            </TableCell>
+
+            <TableCell>
+              £{Number(item.line_total || 0).toFixed(2)}
+            </TableCell>
+
+            <TableCell>
+              <Chip
+                size="small"
+                label={item.processing_status_display}
+                color={
+                  item.processing_status === "COMPLETED"
+                    ? "success"
+                    : item.processing_status === "PROCESSING"
+                    ? "warning"
+                    : "default"
+                }
+              />
+            </TableCell>
+
+            <TableCell>
+              {item.assigned_to_username || "-"}
+            </TableCell>
+
+            <TableCell>
+              <Box>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                >
+                  Primary:{" "}
+                  {item?.stock_detail?.primary_location ||
+                    "NA"}
+                </Typography>
+
+                <br />
+
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                >
+                  Secondary:{" "}
+                  {item?.stock_detail?.secondary_location ||
+                    "NA"}
+                </Typography>
+              </Box>
+            </TableCell>
+
+            <TableCell
+              align="center"
+              sx={{ cursor: "pointer" }}
+              onClick={() =>
+                window.open(
+                  getItemQrUrlLocal(
+                    selectedOrder.id,
+                    item.id
+                  ),
+                  "_blank"
+                )
+              }
+            >
+              <QRCodeCanvas
+                value={getItemQrUrl(
+                  selectedOrder.id,
+                  item.id
+                )}
+                size={100}
+                level="H"
+                includeMargin
+              />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  )}
+</Section>
 
               <Section title="Totals">
                 <Grid container spacing={2}>
