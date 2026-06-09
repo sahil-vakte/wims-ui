@@ -225,7 +225,7 @@ const LoginPage = () => {
           </form>
 
           <Typography variant="body2" className="footer-note">
-            By signing in you agree to our terms.
+            By signing in you agree to our terms...
           </Typography>
         </CardContent>
       </Card>
