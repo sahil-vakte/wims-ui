@@ -341,7 +341,7 @@ const ProductsEdit = ({ product, onSuccess }) => {
         <Grid item xs={12} sm={6}>
           <TextField fullWidth label="Effective Price" name="effective_price" type="number"
             value={formData.effective_price} onChange={handleChange} sx={fieldSx}
-            InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }} />
+            InputProps={{ startAdornment: <InputAdornment position="start">£</InputAdornment> }} />
         </Grid>
 
         <Grid item xs={12}>

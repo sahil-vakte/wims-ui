@@ -1468,7 +1468,7 @@ const ProductsList = () => {
         width: 100,
         renderCell: (p) => (
           <Typography sx={{ fontWeight: 600, color: theme.text }}>
-            {p.value ? `$${p.value}` : "—"}
+            {p.value ? `£${p.value}` : "—"}
           </Typography>
         ),
       },
