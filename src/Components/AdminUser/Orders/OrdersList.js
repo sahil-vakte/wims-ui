@@ -21,9 +21,10 @@ import {
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import ApiServices from "../../../Services/ApiServices/ApiServices";
-import { getDecryptedAccessToken } from "../../../Services/LoginUserDetails.js/LoginUserSavedDetails";
+import { getDecryptedAccessToken, getDecryptedData } from "../../../Services/LoginUserDetails.js/LoginUserSavedDetails";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { QRCodeCanvas } from "qrcode.react"; 
+import { LinearProgress } from "@mui/material";
 /* ---------------- HELPERS ---------------- */
 const InfoRow = ({ label, value }) => (
   <Grid item xs={12} md={6}>
@@ -46,6 +47,8 @@ const Section = ({ title, children }) => (
 /* ---------------- MAIN ---------------- */
 const OrdersList = () => {
   const accessToken = getDecryptedAccessToken();
+  const user = getDecryptedData();
+const isSuperUser = Boolean(user?.is_superuser);
 
   const headers = {
     Authorization: accessToken
@@ -74,11 +77,22 @@ const [detailsLoading, setDetailsLoading] = useState(false);
   useEffect(() => {
     fetchOrders();
   }, []);
-const getItemQrUrl = (orderId, itemId) =>
-  `http://wims.cloud/employee-user/order-process-item/${orderId}/${itemId}`;
+const getItemQrUrl = (orderId, itemId) => {
+  if (user?.is_superuser) {
+    return `http://wims.cloud/admin-user/order-process-item/${orderId}/${itemId}`;
+  }
 
-const getItemQrUrlLocal = (orderId, itemId) =>
-  `http://localhost:3000/admin-user/order-process-item/${orderId}/${itemId}`;
+  return `http://wims.cloud/employee-user/order-process-item/${orderId}/${itemId}`;
+};
+
+const getItemQrUrlLocal = (orderId, itemId) => {
+  if (user?.is_superuser) {
+    return `${window.location.origin}/admin-user/order-process-item/${orderId}/${itemId}`;
+  }
+
+  return `${window.location.origin}/employee-user/order-process-item/${orderId}/${itemId}`;
+};
+
 
 
 const fetchOrderDetails = async (orderId) => {
@@ -157,35 +171,25 @@ const fetchOrders = async () => {
   }, [orders, search, orderStatus, paymentStatus]);
 
   /* ---------------- ROWS ---------------- */
-  const rows = useMemo(() => {
-    return filteredOrders.map((o, i) => ({
-      id: o?.id ?? i,
-
-      external_order_id: o?.external_order_id || "-",
-      customer_name: o?.customer_name || "-",
-
-      order_status: o?.order_status,
-      order_status_display: o?.order_status_display,
-
-      payment_status: o?.payment_status,
-      payment_status_display: o?.payment_status_display,
-
-      item_count: o?.item_count ?? 0,
-      total_quantity: o?.total_quantity ?? 0,
-
-      // ✅ MUST EXIST IN ROWS
-      order_date: o?.order_date || null,
-      total_amount: o?.total_amount || null,
-
-      payment_method: o?.payment_method || "-",
-
-      raw: o, // keep raw for dialog
-    }));
-  }, [filteredOrders]);
+ const rows = useMemo(() => {
+  return filteredOrders.map((o, i) => ({
+    id: o?.id ?? i,
+    external_order_id: o?.external_order_id || "-",
+    customer_name: o?.customer_name || "-",
+    order_status: o?.order_status,
+    order_status_display: o?.order_status_display,
+    completion_percentage: Number(o?.completion_percentage ?? 0),
+    item_count: o?.item_count ?? 0,
+    total_quantity: o?.total_quantity ?? 0,
+    order_date: o?.order_date || null,
+    total_amount: o?.total_amount ?? null,
+    raw: o,
+  }));
+}, [filteredOrders]);
 
   /* ---------------- COLUMNS ---------------- */
-  const columns = [
-    {
+const columns = [
+   {
       field: "external_order_id",
       headerName: "Order",
       flex: 1.2,
@@ -203,105 +207,93 @@ const fetchOrders = async () => {
         </Typography>
       ),
     },
-    { field: "customer_name", headerName: "Customer", flex: 1.4 },
+  { field: "customer_name", headerName: "Customer", flex: 1.4 },
+  {
+    field: "order_status",
+    headerName: "Order Status",
+    flex: 1,
+    renderCell: ({ row }) => (
+      <Chip
+        size="small"
+        label={row.order_status_display || "-"}
+        color={
+          row.order_status === "PROCESSING"
+            ? "warning"
+            : row.order_status === "DELIVERED"
+            ? "success"
+            : "info"
+        }
+      />
+    ),
+  },
+  {
+    field: "completion_percentage",
+    headerName: "Completion",
+    flex: 1.2,
+    renderCell: ({ row }) => {
+      const value = Math.min(Math.max(row.completion_percentage || 0, 0), 100);
 
-    {
-      field: "order_status",
-      headerName: "Order Status",
-      flex: 1,
-      renderCell: ({ row }) => (
-        <Chip
-          size="small"
-          label={row.order_status_display}
-          color={
-            row.order_status === "PROCESSING"
-              ? "warning"
-              : row.order_status === "DELIVERED"
-              ? "success"
-              : "info"
-          }
-        />
-      ),
-    },
-
-    {
-      field: "payment_status",
-      headerName: "Payment",
-      flex: 1,
-      renderCell: ({ row }) => (
-        <Chip
-          size="small"
-          label={row.payment_status_display}
-          color={row.payment_status === "PAID" ? "success" : "error"}
-        />
-      ),
-    },
-
-    { field: "item_count", headerName: "Items", flex: 0.6 },
-    { field: "total_quantity", headerName: "Qty", flex: 0.6 },
-
-    {
-      field: "order_date",
-      headerName: "Order Date",
-      flex: 1.2,
-      valueFormatter: (params) => {
-        const value = params?.value;
-        if (!value) return "-";
-        return new Date(value).toLocaleDateString();
-      },
-    },
-
-    {
-      field: "total_amount",
-      headerName: "Total (£)",
-      flex: 0.8,
-      valueFormatter: (params) => {
-        const value = params?.value;
-        if (!value) return "£0.00";
-        return `£${Number(value).toFixed(2)}`;
-      },
-    },
-
-    { field: "payment_method", headerName: "Payment Method", flex: 1.2 },
-    {
-      field: "actions",
-      headerName: "Actions",
-      flex: 1,
-      sortable: false,
-      renderCell: ({ row }) => (
-        <Button
-          size="small"
-          variant="outlined"
-          startIcon={<OpenInNewIcon />}
-          onClick={() => window.open(`/admin-user/order-processing/${row.id}`, "_blank")}
-        >
-          Show Details
-        </Button>
-      ),
-    },
-    {
-      field: "qr",
-      headerName: "QR",
-      flex: 0.7,
-      sortable: false,
-      filterable: false,
-      renderCell: ({ row }) => {
-        // const qrUrl = `${window.location.origin}/admin-user/order-processing/${row.id}`;
-        const qrUrl = `http://192.168.1.5:3001/employee-user/order-processing/${row.id}`;
-
-        return (
-          <QRCodeCanvas
-            value={qrUrl}
-            bgColor="#ffffff"
-            fgColor="#000000"
-            size={90}            // ⭐ table-optimized size
-            level="H"  
-            includeMargin
+      return (
+        <Box sx={{ width: "100%" }}>
+          <Typography variant="caption" fontWeight={600}>
+            {value}%
+          </Typography>
+          <LinearProgress
+            variant="determinate"
+            value={value}
+            sx={{ mt: 0.5, height: 8, borderRadius: 1 }}
           />
-        );
-      },
+        </Box>
+      );
     },
-  ];
+  },
+  { field: "item_count", headerName: "Items", flex: 0.6 },
+  { field: "total_quantity", headerName: "Qty", flex: 0.6 },
+  {
+    field: "order_date",
+    headerName: "Order Date",
+    flex: 1.2,
+    renderCell: ({ row }) =>
+      row.order_date ? new Date(row.order_date).toLocaleDateString() : "-",
+  },
+  {
+    field: "total_amount",
+    headerName: "Total (£)",
+    flex: 0.8,
+    renderCell: ({ row }) => {
+      const amount = Number(row.total_amount || 0);
+      return `£${amount.toFixed(2)}`;
+    },
+  },
+  ...(isSuperUser
+    ? [
+        {
+          field: "actions",
+          headerName: "Actions",
+          flex: 1.1,
+          minWidth: 150,
+          sortable: false,
+          filterable: false,
+          renderCell: ({ row }) => (
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<OpenInNewIcon />}
+              sx={{
+                whiteSpace: "nowrap",
+                minWidth: 130,
+              }}
+              onClick={() =>
+                window.open(`/admin-user/order-processing/${row.id}`, "_blank")
+              }
+            >
+              Show Details
+            </Button>
+          ),
+        },
+      ]
+    : []),
+];
 
   return (
     <Box>

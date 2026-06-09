@@ -8,6 +8,7 @@ import OrdersList from '../../Components/AdminUser/Orders/OrdersList'
 import OrderProcessing from '../../Components/AdminUser/Orders/OrderProcessing'
 import EmployeeSidebar from '../../Container/EmployeeUser/EmployeeSidebar'
 import OrderProcessByItem from '../../Components/AdminUser/Orders/OrderProcessByItem'
+import EmployeeHomePage from '../../Container/EmployeeUser/EmployeeHomePage'
 
 
 const EmployeeRoutes = () => {
@@ -16,16 +17,17 @@ const EmployeeRoutes = () => {
   return (
     <div>
           <div>
-      <EmployeeSidebar />
-      <div style={{ marginLeft: isLargeScreen ? '250px' : '0', flexGrow: 1, padding: "10px" }}>
+      {/* <EmployeeSidebar /> */}
+      {/* <div style={{ marginLeft: isLargeScreen ? '250px' : '0', flexGrow: 1, padding: "10px" }}> */}
 
       <Routes>
+          <Route path="/home"  element={<EmployeeHomePage/>}/>
           <Route path="/my-orders"  element={<OrdersList/>}/>
           <Route path="/order-processing/:id"  element={<OrderProcessing/>}/>
           <Route path="/order-process-item/:orderId/:itemId"  element={<OrderProcessByItem/>}/>
           
       </Routes>
-    </div>
+    {/* </div> */}
     </div>
     </div>
   )

@@ -86,7 +86,8 @@ const LoginPage = () => {
         navigate("/admin-user/dashboard");
       } else if (isStaff) {
         // staff user
-        navigate("/employee-user/dashboard");
+        navigate("/employee-user/home");
+        // navigate("/employee-user/dashboard");
       } else if (isSuper) {
         // superuser (if you have a different route)
         navigate("/employee-user/dashboard");

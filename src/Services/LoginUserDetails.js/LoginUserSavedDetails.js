@@ -70,16 +70,6 @@ export const getDecryptedRefreshToken = () => {
 };
 
 
-export const getPatientListPatientTabsData = () => {
-  const encryptedData = sessionStorage.getItem("PatientListPatientTabsData");
-  if (encryptedData) {
-    const bytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
-    const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
-    return JSON.parse(decryptedData);
-  }
-  return null;
-};
-
 
 export const getDecryptedDataFromSessionStorage = (key) => {
   const encryptedData = sessionStorage.getItem(key);
