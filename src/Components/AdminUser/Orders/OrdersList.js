@@ -713,7 +713,7 @@ const OrdersList = () => {
 
   const getItemQrUrl = (orderId, itemId) => {
     if (user?.is_superuser) {
-      return `http://wims.cloud/admin-user/order-process-item/${orderId}/${itemId}`;
+      return `http://wims.cloud/employee-user/order-process-item/${orderId}/${itemId}`;
     }
     return `http://wims.cloud/employee-user/order-process-item/${orderId}/${itemId}`;
   };
