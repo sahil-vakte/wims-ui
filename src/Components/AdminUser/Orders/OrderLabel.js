@@ -27,8 +27,9 @@ import { getDecryptedAccessToken } from "../../../Services/LoginUserDetails.js/L
 
 const OrderLabel = () => {
   const [orders, setOrders] = useState([]);
-  const [selectedOrders, setSelectedOrders] = useState([]);
+  const [selectedItems, setSelectedItems] = useState([]);
   const [labelFilter, setLabelFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState("ALL");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -90,142 +91,275 @@ const OrderLabel = () => {
     fetchAllOrders();
   }, [fetchAllOrders]);
 
-  const filteredOrders = useMemo(() => {
-    return orders.filter((order) => {
-      const items = order.items || [];
+  const allItems = useMemo(() => {
+    return orders.flatMap((order) =>
+      (order.items || []).map((item) => ({
+        ...item,
+        order_id: order.id,
+        external_order_id: order.external_order_id,
+        order_number: order.order_number,
+        order_date: order.order_date,
+        order_source: order.order_source,
+        order_status: order.order_status,
+        order_status_display: order.order_status_display,
+        payment_status: order.payment_status,
+        payment_status_display: order.payment_status_display,
+        customer_name: order.customer_name,
+        customer_email: order.customer_email,
+        item_count: order.items?.length || 0,
+      }))
+    );
+  }, [orders]);
 
-      if (labelFilter === "ALL") return true;
+  const isItemPrinted = (item) => item.lable_printed === true;
 
-      const hasPrinted = items.some((item) => item.lable_printed === true);
-      const allPrinted =
-        items.length > 0 && items.every((item) => item.lable_printed === true);
+  const isItemCompleted = (item) =>
+    item.processing_status === "COMPLETED" ||
+    item.processing_status_display === "Completed";
 
-      if (labelFilter === "PRINTED") return hasPrinted;
-      if (labelFilter === "NOT_PRINTED") return !allPrinted;
+  const statusOptions = useMemo(() => {
+    const map = new Map();
+
+    allItems.forEach((item) => {
+      if (item.processing_status) {
+        map.set(
+          item.processing_status,
+          item.processing_status_display || item.processing_status
+        );
+      }
+    });
+
+    return Array.from(map.entries()).map(([value, label]) => ({
+      value,
+      label,
+    }));
+  }, [allItems]);
+
+  const filteredItems = useMemo(() => {
+    return allItems.filter((item) => {
+      if (labelFilter === "PRINTED" && !isItemPrinted(item)) return false;
+      if (labelFilter === "NOT_PRINTED" && isItemPrinted(item)) return false;
+
+      if (statusFilter !== "ALL" && item.processing_status !== statusFilter) {
+        return false;
+      }
 
       return true;
     });
-  }, [orders, labelFilter]);
-
-  const isOrderFullyPrinted = (order) => {
-    const items = order.items || [];
-    return items.length > 0 && items.every((item) => item.lable_printed === true);
-  };
+  }, [allItems, labelFilter, statusFilter]);
 
   const handleSelectAll = (event) => {
     if (event.target.checked) {
-      const selectableOrders = filteredOrders
-        .filter((order) => !isOrderFullyPrinted(order))
-        .map((order) => order.id);
+      const selectableItems = filteredItems
+        .filter((item) => !isItemPrinted(item))
+        .filter((item) => !isItemCompleted(item))
+        .map((item) => item.id);
 
-      setSelectedOrders(selectableOrders);
+      setSelectedItems(selectableItems);
     } else {
-      setSelectedOrders([]);
+      setSelectedItems([]);
     }
   };
 
-  const handleSelectOrder = (orderId) => {
-    setSelectedOrders((prev) =>
-      prev.includes(orderId)
-        ? prev.filter((id) => id !== orderId)
-        : [...prev, orderId]
+  const handleSelectItem = (itemId) => {
+    setSelectedItems((prev) =>
+      prev.includes(itemId)
+        ? prev.filter((id) => id !== itemId)
+        : [...prev, itemId]
     );
   };
 
-  const downloadSelectedOrders = async () => {
-    try {
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet("Order Labels");
+  // const downloadSelectedItems = async () => {
+  //   try {
+  //     const workbook = new ExcelJS.Workbook();
+  //     const worksheet = workbook.addWorksheet("Order Labels");
 
-      worksheet.columns = [
-        { header: "Type", key: "type", width: 10 },
-        { header: "SKU", key: "sku", width: 20 },
-        { header: "Product Name", key: "product", width: 60 },
-        { header: "Qty", key: "qty", width: 10 },
-        { header: "External Order ID", key: "externalOrderId", width: 20 },
-        { header: "Source", key: "source", width: 15 },
-        { header: "Status", key: "status", width: 15 },
-        { header: "Date", key: "date", width: 25 },
-        { header: "QR URL", key: "qr", width: 70 },
-        { header: "Label Printed", key: "labelPrinted", width: 18 },
-      ];
+  //     worksheet.columns = [
+  //       { header: "Type", key: "type", width: 10 },
+  //       { header: "SKU", key: "sku", width: 20 },
+  //       { header: "Product Name", key: "product", width: 60 },
+  //       { header: "Qty", key: "qty", width: 10 },
+  //       { header: "External Order ID", key: "externalOrderId", width: 20 },
+  //       { header: "Source", key: "source", width: 15 },
+  //       { header: "Status", key: "status", width: 15 },
+  //       { header: "Date", key: "date", width: 25 },
+  //       { header: "QR URL", key: "qr", width: 70 },
+  //       { header: "Label Printed", key: "labelPrinted", width: 18 },
+  //     ];
 
-      worksheet.getRow(1).font = { bold: true };
+  //     worksheet.getRow(1).font = { bold: true };
 
-      const selected = orders.filter((order) =>
-        selectedOrders.includes(order.id)
-      );
+  //     const selected = allItems.filter((item) =>
+  //       selectedItems.includes(item.id)
+  //     );
 
-      selected.forEach((order) => {
-        order.items?.forEach((item) => {
-          worksheet.addRow({
-            type: order.items?.length > 1 ? "M" : "S",
-            sku: item.sku,
-            product: item.product_name,
-            qty: item.quantity,
-            externalOrderId: order.external_order_id,
-            source: "WEB",
-            status: order.order_status_display,
-            date: new Date(order.order_date).toLocaleString(),
-            qr: `https://wims.cloud/employee-user/order-process-item/${order.id}/${item.id}`,
-            labelPrinted: item.lable_printed ? "Printed" : "Pending",
-          });
-        });
-      });
+  //     selected.forEach((item) => {
+  //       worksheet.addRow({
+  //         type: item.item_count > 1 ? "M" : "S",
+  //         sku: item.sku,
+  //         product: item.product_name,
+  //         qty: item.quantity,
+  //         externalOrderId: item.external_order_id,
+  //         source: item.order_source || "WEB",
+  //         status: item.processing_status_display || item.processing_status,
+  //         date: item.order_date ? new Date(item.order_date).toLocaleString() : "",
+  //         qr: `https://wims.cloud/employee-user/order-process-item/${item.order_id}/${item.id}`,
+  //         labelPrinted: item.lable_printed ? "Printed" : "Pending",
+  //       });
+  //     });
 
-      worksheet.eachRow((row) => {
-        row.eachCell((cell) => {
-          cell.alignment = {
-            vertical: "middle",
-            horizontal: "center",
-            wrapText: true,
-          };
+  //     worksheet.eachRow((row) => {
+  //       row.eachCell((cell) => {
+  //         cell.alignment = {
+  //           vertical: "middle",
+  //           horizontal: "center",
+  //           wrapText: true,
+  //         };
 
-          cell.border = {
-            top: { style: "thin" },
-            left: { style: "thin" },
-            right: { style: "thin" },
-            bottom: { style: "thin" },
-          };
-        });
-      });
+  //         cell.border = {
+  //           top: { style: "thin" },
+  //           left: { style: "thin" },
+  //           right: { style: "thin" },
+  //           bottom: { style: "thin" },
+  //         };
+  //       });
+  //     });
 
-      const buffer = await workbook.xlsx.writeBuffer();
+  //     const buffer = await workbook.xlsx.writeBuffer();
 
-      saveAs(
-        new Blob([buffer], {
-          type:
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        }),
-        `Order_Labels_${Date.now()}.xlsx`
-      );
-    } catch (err) {
-      console.error("Download Error:", err);
+  //     saveAs(
+  //       new Blob([buffer], {
+  //         type:
+  //           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  //       }),
+  //       `Order_Item_Labels_${Date.now()}.xlsx`
+  //     );
+  //   } catch (err) {
+  //     console.error("Download Error:", err);
+  //   }
+  // };
+
+
+  const downloadSelectedItems = async () => {
+  try {
+    setError("");
+
+    const selected = allItems.filter((item) =>
+      selectedItems.includes(item.id)
+    );
+
+    if (!selected.length) {
+      setError("Please select at least one item.");
+      return;
     }
-  };
 
-  const allSelectableIds = filteredOrders
-    .filter((order) => !isOrderFullyPrinted(order))
-    .map((order) => order.id);
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Order Labels");
+
+    worksheet.columns = [
+      { header: "Type", key: "type", width: 10 },
+      { header: "SKU", key: "sku", width: 20 },
+      { header: "Product Name", key: "product", width: 60 },
+      { header: "Qty", key: "qty", width: 10 },
+      { header: "External Order ID", key: "externalOrderId", width: 20 },
+      { header: "Source", key: "source", width: 15 },
+      { header: "Status", key: "status", width: 15 },
+      { header: "Date", key: "date", width: 25 },
+      { header: "QR URL", key: "qr", width: 70 },
+      { header: "Label Printed", key: "labelPrinted", width: 18 },
+    ];
+
+    worksheet.getRow(1).font = { bold: true };
+
+    selected.forEach((item) => {
+      worksheet.addRow({
+        type: item.item_count > 1 ? "M" : "S",
+        sku: item.sku,
+        product: item.product_name,
+        qty: item.quantity,
+        externalOrderId: item.external_order_id,
+        source: item.order_source || "WEB",
+        status: item.processing_status_display || item.processing_status,
+        date: item.order_date
+          ? new Date(item.order_date).toLocaleString()
+          : "",
+        qr: `https://wims.cloud/employee-user/order-process-item/${item.order_id}/${item.id}`,
+        labelPrinted: item.lable_printed ? "Printed" : "Pending",
+      });
+    });
+
+    worksheet.eachRow((row) => {
+      row.eachCell((cell) => {
+        cell.alignment = {
+          vertical: "middle",
+          horizontal: "center",
+          wrapText: true,
+        };
+
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          right: { style: "thin" },
+          bottom: { style: "thin" },
+        };
+      });
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+
+    saveAs(
+      new Blob([buffer], {
+        type:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      }),
+      `Order_Item_Labels_${Date.now()}.xlsx`
+    );
+
+    await ApiServices.patch(
+      "orders/items/lable-printed",
+      {
+        lable_printed: true,
+        order_item_ids: selected.map((item) => item.id),
+      },
+      headers
+    );
+
+    setSelectedItems([]);
+    await fetchAllOrders();
+  } catch (err) {
+    console.error("Download / Label Printed Error:", err);
+    setError(
+      err?.response?.data?.detail ||
+        err?.response?.data?.message ||
+        "Excel downloaded, but failed to update label printed status."
+    );
+  }
+};
+
+  const selectableItemIds = filteredItems
+    .filter((item) => !isItemPrinted(item))
+    .filter((item) => !isItemCompleted(item))
+    .map((item) => item.id);
 
   const allSelected =
-    allSelectableIds.length > 0 &&
-    allSelectableIds.every((id) => selectedOrders.includes(id));
+    selectableItemIds.length > 0 &&
+    selectableItemIds.every((id) => selectedItems.includes(id));
 
   const partiallySelected =
-    selectedOrders.length > 0 &&
-    allSelectableIds.some((id) => selectedOrders.includes(id)) &&
+    selectedItems.length > 0 &&
+    selectableItemIds.some((id) => selectedItems.includes(id)) &&
     !allSelected;
 
   return (
     <Box p={3}>
       <Typography variant="h5" gutterBottom fontWeight={700}>
-        Order Labels Download
+        Order Item Labels Download
       </Typography>
 
       <Typography variant="body2" sx={{ mb: 2 }}>
-        Total Orders: {orders.length} | Showing: {filteredOrders.length} |
-        Selected Orders: {selectedOrders.length}
+        Total Orders: {orders.length} | Total Items: {allItems.length} |
+        Showing Items: {filteredItems.length} | Selected Items:{" "}
+        {selectedItems.length}
       </Typography>
 
       <Stack
@@ -236,10 +370,10 @@ const OrderLabel = () => {
       >
         <Button
           variant="contained"
-          onClick={downloadSelectedOrders}
-          disabled={selectedOrders.length === 0}
+          onClick={downloadSelectedItems}
+          disabled={selectedItems.length === 0}
         >
-          Download Selected Orders
+          Download Selected Items
         </Button>
 
         <Button variant="outlined" onClick={fetchAllOrders}>
@@ -248,18 +382,36 @@ const OrderLabel = () => {
 
         <FormControl size="small" sx={{ minWidth: 220 }}>
           <InputLabel>Label Status</InputLabel>
-
           <Select
             value={labelFilter}
             label="Label Status"
             onChange={(e) => {
               setLabelFilter(e.target.value);
-              setSelectedOrders([]);
+              setSelectedItems([]);
             }}
           >
-            <MenuItem value="ALL">All Orders</MenuItem>
+            <MenuItem value="ALL">All Items</MenuItem>
             <MenuItem value="PRINTED">Label Printed</MenuItem>
             <MenuItem value="NOT_PRINTED">Label Not Printed</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" sx={{ minWidth: 220 }}>
+          <InputLabel>Item Status</InputLabel>
+          <Select
+            value={statusFilter}
+            label="Item Status"
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setSelectedItems([]);
+            }}
+          >
+            <MenuItem value="ALL">All Status</MenuItem>
+            {statusOptions.map((status) => (
+              <MenuItem key={status.value} value={status.value}>
+                {status.label}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
       </Stack>
@@ -293,19 +445,17 @@ const OrderLabel = () => {
                 </TableCell>
 
                 <TableCell>
-                  <strong>External Order ID</strong>
+                  <strong>Order ID</strong>
                 </TableCell>
 
-                <TableCell>
-                  <strong>Customer</strong>
-                </TableCell>
+
 
                 <TableCell width={90}>
                   <strong>Type</strong>
                 </TableCell>
 
                 <TableCell>
-                  <strong>Products</strong>
+                  <strong>Product</strong>
                 </TableCell>
 
                 <TableCell>
@@ -313,28 +463,28 @@ const OrderLabel = () => {
                 </TableCell>
 
                 <TableCell>
-                  <strong>Status</strong>
+                  <strong>Item Status</strong>
                 </TableCell>
 
-                <TableCell>
-                  <strong>Payment</strong>
-                </TableCell>
+               
               </TableRow>
             </TableHead>
 
             <TableBody>
-              {filteredOrders.length > 0 ? (
-                filteredOrders.map((order) => {
-                  const fullyPrinted = isOrderFullyPrinted(order);
+              {filteredItems.length > 0 ? (
+                filteredItems.map((item) => {
+                  const printed = isItemPrinted(item);
+                  const completed = isItemCompleted(item);
 
                   return (
-                    <TableRow key={order.id} hover>
+                    <TableRow key={item.id} hover>
                       <TableCell>
                         <Checkbox
-                          checked={selectedOrders.includes(order.id)}
-                          onChange={() => handleSelectOrder(order.id)}
+                          checked={selectedItems.includes(item.id)}
+                          onChange={() => handleSelectItem(item.id)}
                         />
-                        {fullyPrinted && (
+
+                        {printed && (
                           <Typography
                             variant="caption"
                             display="block"
@@ -343,108 +493,84 @@ const OrderLabel = () => {
                             Printed
                           </Typography>
                         )}
+
+                        {completed && (
+                          <Typography
+                            variant="caption"
+                            display="block"
+                            color="success.main"
+                          >
+                            Completed
+                          </Typography>
+                        )}
                       </TableCell>
 
                       <TableCell>
                         <Typography fontWeight={700}>
-                          {order.external_order_id}
+                          {item.external_order_id}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {order.order_number}
-                        </Typography>
+                        
                       </TableCell>
 
-                      <TableCell>
-                        <Typography fontWeight={600}>
-                          {order.customer_name || "—"}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {order.customer_email || "—"}
-                        </Typography>
-                      </TableCell>
+                      
 
                       <TableCell>
                         <Chip
-                          label={order.items?.length > 1 ? "M" : "S"}
+                          label={item.item_count > 1 ? "M" : "S"}
                           size="small"
-                          color={order.items?.length > 1 ? "secondary" : "default"}
+                          color={item.item_count > 1 ? "secondary" : "default"}
                         />
                       </TableCell>
 
                       <TableCell>
-                        <Stack spacing={1}>
-                          {order.items?.map((item) => (
-                            <Box
-                              key={item.id}
-                              sx={{
-                                p: 1,
-                                borderRadius: 1.5,
-                                bgcolor: "#f8fafc",
-                                border: "1px solid #e2e8f0",
-                              }}
-                            >
-                              <Typography fontWeight={700} fontSize={13}>
-                                {item.sku}
-                              </Typography>
+                        <Box
+                          sx={{
+                            p: 1,
+                            borderRadius: 1.5,
+                            bgcolor: "#f8fafc",
+                            border: "1px solid #e2e8f0",
+                          }}
+                        >
+                          <Typography fontWeight={700} fontSize={13}>
+                            {item.sku}
+                          </Typography>
 
-                              <Typography variant="body2">
-                                {item.product_name}
-                              </Typography>
+                          <Typography variant="body2">
+                            {item.product_name}
+                          </Typography>
 
-                              <Typography variant="caption" color="text.secondary">
-                                Qty: {item.quantity} | Status:{" "}
-                                {item.processing_status_display ||
-                                  item.processing_status}
-                              </Typography>
-                            </Box>
-                          ))}
-                        </Stack>
-                      </TableCell>
-
-                      <TableCell>
-                        <Stack direction="row" flexWrap="wrap" gap={1}>
-                          {order.items?.map((item) => (
-                            <Chip
-                              key={item.id}
-                              label={
-                                item.lable_printed ? "Printed" : "Pending"
-                              }
-                              size="small"
-                              color={item.lable_printed ? "success" : "warning"}
-                            />
-                          ))}
-                        </Stack>
+                          <Typography variant="caption" color="text.secondary">
+                            Qty: {item.quantity}
+                          </Typography>
+                        </Box>
                       </TableCell>
 
                       <TableCell>
                         <Chip
-                          label={order.order_status_display || order.order_status}
-                          color="info"
+                          label={printed ? "Printed" : "Pending"}
                           size="small"
+                          color={printed ? "success" : "warning"}
                         />
                       </TableCell>
 
                       <TableCell>
                         <Chip
                           label={
-                            order.payment_status_display ||
-                            order.payment_status
+                            item.processing_status_display ||
+                            item.processing_status
                           }
-                          color={
-                            order.payment_status === "PAID"
-                              ? "success"
-                              : "warning"
-                          }
+                          color={completed ? "success" : "info"}
                           size="small"
                         />
                       </TableCell>
+
                     </TableRow>
                   );
                 })
               ) : (
                 <TableRow>
                   <TableCell colSpan={8} align="center">
-                    No Orders Found
+                    No Items Found
                   </TableCell>
                 </TableRow>
               )}

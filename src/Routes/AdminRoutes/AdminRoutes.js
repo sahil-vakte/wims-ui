@@ -16,6 +16,7 @@ import { Box,Breadcrumbs, Typography, IconButton } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu';
 import HomeIcon from '@mui/icons-material/Home';
 import BatchesList from '../../Components/AdminUser/Batches/BatchesList'
+import Dashboard from '../../Components/Dashboard/Dashboard'
 
 const TopBar = ({ onMenuClick }) => {
   const location = useLocation();
@@ -77,6 +78,7 @@ const AdminRoutes = () => {
 
         <Box sx={{ p: 2 }}>
           <Routes>
+            <Route path="/dashboard" element={<Dashboard/>} />
             <Route path="/colors-library" element={<ColorsList />} />
             <Route path="/products" element={<ProductsList />} />
             <Route path="/orders" element={<OrdersList />} />
