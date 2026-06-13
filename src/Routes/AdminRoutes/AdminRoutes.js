@@ -15,6 +15,7 @@ import OrderProcessByItem from '../../Components/AdminUser/Orders/OrderProcessBy
 import { Box,Breadcrumbs, Typography, IconButton } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu';
 import HomeIcon from '@mui/icons-material/Home';
+import BatchesList from '../../Components/AdminUser/Batches/BatchesList'
 
 const TopBar = ({ onMenuClick }) => {
   const location = useLocation();
@@ -84,6 +85,7 @@ const AdminRoutes = () => {
             <Route path="/employees" element={<EmployeesList />} />
             <Route path="/order-label" element={<OrderLabel />} />
             <Route path="/order-label-test" element={<OrderLabelTest />} />
+            <Route path="/batches" element={<BatchesList/>} />
             <Route path="/order-process-item/:orderId/:itemId" element={<OrderProcessByItem />} />
           </Routes>
         </Box>

@@ -1,720 +1,149 @@
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  Box,
-  Typography,
-  Grid,
-  Paper,
-  Checkbox,
-  Button,
-  TextField,
-  Alert,
-  Snackbar,
-  CircularProgress,
-} from "@mui/material";
+import ExcelJS from "exceljs";
+import QRCode from "qrcode";
+import { saveAs } from "file-saver";
 
-import { getDecryptedAccessToken } from "../../../Services/LoginUserDetails.js/LoginUserSavedDetails";
-import ApiServices from "../../../Services/ApiServices/ApiServices";
+const OrderLabelTest = () => {
 
-const OrderLabel = () => {
-  const [orders, setOrders] = useState([]);
-  const [selectedLabels, setSelectedLabels] = useState({});
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [printer, setPrinter] = useState("");
-  const [printerList, setPrinterList] = useState([]);
+  const orders = [
+  {
+    id: 336,
+    external_order_id: "WEB235285",
+    order_source: "XML",
+    order_date: "2026-06-10T10:37:26Z",
+    items: [
+      { id: 981, sku: "Q54 FLYL", product_name: "Shiny Lycra 4 Way Stretch Material- Flo Yellow Q54 FLYL", quantity: 1 },
+      { id: 982, sku: "Q300 YL (NEW)", product_name: "Viscose Cotton Stretch Lycra Fabric- Yellow Q300 YL", quantity: 1 },
+      { id: 983, sku: "Q36 YL", product_name: "Soft Touch Stretchy Fabric- Yellow Q36 YL", quantity: 1 },
+      { id: 984, sku: "Q35AA BTYL", product_name: 'Cotton Lycra 70" Wide Jersey 4 Way Stretch Fabric- Bright Yellow Q35AA BTYL', quantity: 1 },
+    ],
+  },
+  {
+    id: 331,
+    external_order_id: "WEB235276",
+    order_source: "XML",
+    order_date: "2026-06-09T23:20:54Z",
+    items: [
+      { id: 969, sku: "109T", product_name: "Power Mesh 4 Way Stretch Dressmaking Material- 109T Colour: Turquoise", quantity: 1 },
+      { id: 970, sku: "109 P TQ", product_name: "Power Mesh 4 Way Stretch Dressmaking Material- 109 P Colour: Turquoise", quantity: 1 },
+      { id: 971, sku: "109T", product_name: "Power Mesh 4 Way Stretch Dressmaking Material- 109T Colour: Purple", quantity: 1 },
+      { id: 972, sku: "SQ898 AUB", product_name: "Sequins Beaded Floral Detail Sheer Net Fabric Saree Dress Material SQ898 Colour: Aubergine", quantity: 1 },
+      { id: 973, sku: "EM141 DKPPL", product_name: "Sequin Flower Embellishment- Dark Purple EM141 DKPPL", quantity: 1 },
+      { id: 974, sku: "TS15 BLBR", product_name: "Beaded Fringe Trimming- Aqua Blue/Brown TS15 BLBR", quantity: 1 },
+    ],
+  },
+  {
+    id: 328,
+    external_order_id: "WEB235271",
+    order_source: "XML",
+    order_date: "2026-06-09T22:00:44Z",
+    items: [
+      { id: 932, sku: "PF PPL", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Purple PF PPL", quantity: 1 },
+      { id: 933, sku: "PF OR", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Orange PF OR", quantity: 1 },
+      { id: 934, sku: "PF MNT", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Mint PF MNT", quantity: 1 },
+      { id: 935, sku: "SQ806 NYMLT", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Space Astronauts SQ806 NYMLT", quantity: 1 },
+      { id: 936, sku: "SQ750 BBL", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Hearts SQ750 Colour: Baby Blue", quantity: 2 },
+      { id: 937, sku: "SQ810 MNTMLT", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Pandas & Bunnies SQ810 Colour: Mint/Multi", quantity: 2 },
+      { id: 938, sku: "SQ810 PNMLT", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Pandas & Bunnies SQ810 Colour: Pink/ Multi", quantity: 2 },
+      { id: 939, sku: "SQ810 BBLMLT", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Pandas & Bunnies SQ810 Colour: Baby Blue/Multi", quantity: 2 },
+      { id: 940, sku: "PF BK", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Black PF BK", quantity: 2 },
+      { id: 941, sku: "SQ524 BKMLT", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Mini Dinosaurs SQ524 BKMLT", quantity: 2 },
+      { id: 942, sku: "PF RD", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Red PF RD", quantity: 2 },
+      { id: 943, sku: "SQ351 PNMLT", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Twinkle Stars Print- SQ351 Colour: Pink/ Multi", quantity: 3 },
+      { id: 944, sku: "SQ351 PPLWHT", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Twinkle Stars Print- SQ351 Colour: Purple", quantity: 3 },
+      { id: 945, sku: "SQ351 ORWHT", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Twinkle Stars Print- SQ351 Colour: Orange", quantity: 3 },
+      { id: 946, sku: "SQ611 PNBL", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Pink Fishes SQ611 PNBL", quantity: 3 },
+      { id: 947, sku: "SQ653 STNMLT", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Autumn Spice SQ653 STNMLT", quantity: 3 },
+      { id: 948, sku: "SQ820 BBL", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Patch Hearts SQ820 Colour: Baby Blue", quantity: 3 },
+      { id: 949, sku: "SQ820 BPN", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Patch Hearts SQ820 Colour: Baby Pink", quantity: 3 },
+      { id: 950, sku: "SQ978 BPN", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Love Sweethearts SQ978 BPN", quantity: 3 },
+      { id: 951, sku: "Q1095 RDBL", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Red/Blue Tartan Q1095 RDBL", quantity: 3 },
+      { id: 952, sku: "Q1381 BGBK", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Classic Tartan Q1381 BGBK", quantity: 3 },
+      { id: 953, sku: "SQ961 BK", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Celestial Black SQ961 BK", quantity: 3 },
+      { id: 954, sku: "Q1127 BLBK", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Blue/Black/Green Tartan Q1127 BLBK", quantity: 3 },
+      { id: 955, sku: "SQ610 TQ", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Baby Elephants SQ610 Colour: Turquoise Blue", quantity: 3 },
+      { id: 956, sku: "SQ801 PN", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Guinea Pigs SQ801 Colour: Pink", quantity: 4 },
+      { id: 957, sku: "SQ962 BPN", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Watermelons SQ962 BPN", quantity: 4 },
+      { id: 958, sku: "SQ755 NYMLT", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Night Garden SQ755 NYMLT", quantity: 5 },
+      { id: 959, sku: "SQ540 BLPN", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Galaxy SQ540 BLPN", quantity: 6 },
+      { id: 960, sku: "SQ351 GRMLT", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Twinkle Stars Print- SQ351 Colour: Grey/Multi", quantity: 6 },
+      { id: 961, sku: "PF BPN", product_name: "Polar Fleece Anti Pill Washable Soft Fabric- Baby Pink PF BPN", quantity: 6 },
+    ],
+  },
+];
 
-  const [isPrinting, setIsPrinting] = useState(false);
-  const [printProgress, setPrintProgress] = useState({
-    total: 0,
-    printed: 0,
-    failed: 0,
-  });
-  const [failedPrints, setFailedPrints] = useState([]);
+  const downloadOrderLabels = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Order Labels");
 
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "info",
-  });
+    worksheet.columns = [
+      { header: "QR", key: "qr", width: 70 },
+      { header: "SKU", key: "sku", width: 20 },
+      { header: "Product Name", key: "product", width: 60 },
+      { header: "Qty", key: "qty", width: 10 },
+      { header: "External Order ID", key: "externalOrderId", width: 20 },
+      { header: "Order ID", key: "orderId", width: 12 },
+      { header: "Item ID", key: "itemId", width: 12 },
+      { header: "Source", key: "source", width: 15 },
+      { header: "Date", key: "date", width: 25 },
+    ];
 
-  const accessToken = useMemo(() => getDecryptedAccessToken(), []);
+    worksheet.getRow(1).font = { bold: true };
+    worksheet.getRow(1).height = 25;
 
-  const headers = useMemo(
-    () => (accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-    [accessToken]
-  );
 
-  const showSnackbar = (message, severity = "info") => {
-    setSnackbar({
-      open: true,
-      message,
-      severity,
+
+    for (const order of orders) {
+  for (const item of order.items) {
+    const qrUrl = `https://wims.cloud/employee-user/order-process-item/${order.id}/${item.id}`;
+
+    const row = worksheet.addRow({
+      qr: qrUrl,
+      sku: item.sku,
+      product: item.product_name,
+      qty: item.quantity,
+      externalOrderId: order.external_order_id,
+      orderId: order.id,
+      itemId: item.id,
+      source: order.order_source,
+      date: new Date(order.order_date).toLocaleString(),
     });
-  };
 
-  const closeSnackbar = () => {
-    setSnackbar((prev) => ({
-      ...prev,
-      open: false,
-    }));
-  };
+    row.height = 35;
+  }
+}
 
-  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    worksheet.eachRow((row) => {
+      row.eachCell((cell) => {
+        cell.alignment = {
+          vertical: "middle",
+          horizontal: "center",
+          wrapText: true,
+        };
 
-  /* ---------------- FETCH ORDERS ---------------- */
-
-  const fetchOrders = async () => {
-    try {
-      const res = await ApiServices.get("orders", headers);
-      setOrders(res?.data?.results || []);
-    } catch (err) {
-      console.error("Orders API error:", err);
-      setOrders([]);
-      showSnackbar("Failed to fetch orders", "error");
-    }
-  };
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  /* ---------------- DYMO INIT ---------------- */
-
-  const initDymo = () => {
-    try {
-      if (
-        !window.dymo ||
-        !window.dymo.label ||
-        !window.dymo.label.framework
-      ) {
-        showSnackbar(
-          "DYMO framework not found. Install DYMO Connect and load the DYMO script.",
-          "warning"
-        );
-        return;
-      }
-
-      if (typeof window.dymo.label.framework.init === "function") {
-        try {
-          window.dymo.label.framework.init();
-        } catch (e) {
-          // ignore if already initialized
-        }
-      }
-
-      const printers = window.dymo.label.framework.getPrinters() || [];
-      setPrinterList(printers);
-
-      if (!printers.length) {
-        showSnackbar("No DYMO printers detected", "warning");
-        return;
-      }
-
-      const labelWriterPrinter =
-        printers.find((p) => p.printerType === "LabelWriterPrinter") ||
-        printers[0];
-
-      setPrinter(labelWriterPrinter.name);
-      showSnackbar(`Printer detected: ${labelWriterPrinter.name}`, "success");
-    } catch (err) {
-      console.error("DYMO init error:", err);
-      showSnackbar("Failed to initialize DYMO printer", "error");
-    }
-  };
-
-  useEffect(() => {
-    initDymo();
-  }, []);
-
-  /* ---------------- UTIL ---------------- */
-
-  const getShortTitle = (name) => {
-    if (!name) return "";
-    return name.split("-")[0]?.trim();
-  };
-
-  const toggleSelect = (id) => {
-    setSelectedLabels((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
-  const selectAll = () => {
-    const all = {};
-
-    filteredOrders.forEach((order) => {
-      order.items?.forEach((item) => {
-        all[`${order.id}-${item.id}`] = true;
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
       });
     });
 
-    setSelectedLabels(all);
-  };
+    const buffer = await workbook.xlsx.writeBuffer();
 
-  const clearSelection = () => {
-    setSelectedLabels({});
-  };
-
-  /* ---------------- FILTER ORDERS ---------------- */
-
-  const filteredOrders = orders.filter((order) => {
-    if (!startDate && !endDate) return true;
-
-    const orderDate = new Date(order.order_date);
-
-    if (startDate && new Date(startDate) > orderDate) return false;
-    if (endDate && new Date(endDate) < orderDate) return false;
-
-    return true;
-  });
-
-  /* ---------------- DYMO LABEL TEMPLATE ---------------- */
-
-  const getLabelXml = () => `
-<DieCutLabel Version="8.0" Units="twips">
-  <PaperOrientation>Landscape</PaperOrientation>
-
-  <Id>Address</Id>
-  <PaperName>30252 Address</PaperName>
-  <DrawCommands>
-    <RoundRectangle X="0" Y="0" Width="3060" Height="1260" Rx="0" Ry="0" />
-  </DrawCommands>
-  <ObjectInfo>
-    <TextObject>
-      <Name>TYPE</Name>
-      <Bounds X="40" Y="20" Width="500" Height="180" />
-      <StyledText>
-        <Element>
-          <String>TYPE</String>
-          <Attributes>
-            <Font Family="Arial" Size="10" />
-          </Attributes>
-        </Element>
-      </StyledText>
-    </TextObject>
-  </ObjectInfo>
-
-  <ObjectInfo>
-    <TextObject>
-      <Name>WEB</Name>
-      <Bounds X="40" Y="180" Width="500" Height="160" />
-      <StyledText>
-        <Element>
-          <String>WEB</String>
-          <Attributes>
-            <Font Family="Arial" Size="9" />
-          </Attributes>
-        </Element>
-      </StyledText>
-    </TextObject>
-  </ObjectInfo>
-
-  <ObjectInfo>
-    <TextObject>
-      <Name>STANDARD</Name>
-      <Bounds X="40" Y="330" Width="650" Height="160" />
-      <StyledText>
-        <Element>
-          <String>STANDARD</String>
-          <Attributes>
-            <Font Family="Arial" Size="9" />
-          </Attributes>
-        </Element>
-      </StyledText>
-    </TextObject>
-  </ObjectInfo>
-
-  <ObjectInfo>
-    <TextObject>
-      <Name>ORDERID</Name>
-      <Bounds X="40" Y="510" Width="900" Height="170" />
-      <StyledText>
-        <Element>
-          <String>ORDERID</String>
-          <Attributes>
-            <Font Family="Arial" Size="9" />
-          </Attributes>
-        </Element>
-      </StyledText>
-    </TextObject>
-  </ObjectInfo>
-
-  <ObjectInfo>
-    <TextObject>
-      <Name>PRODUCT</Name>
-      <Bounds X="950" Y="260" Width="1150" Height="320" />
-      <StyledText>
-        <Element>
-          <String>PRODUCT</String>
-          <Attributes>
-            <Font Family="Arial" Size="11" />
-          </Attributes>
-        </Element>
-      </StyledText>
-    </TextObject>
-  </ObjectInfo>
-
-  <ObjectInfo>
-    <TextObject>
-      <Name>SKU</Name>
-      <Bounds X="2200" Y="40" Width="760" Height="300" />
-      <StyledText>
-        <Element>
-          <String>SKU</String>
-          <Attributes>
-            <Font Family="Arial" Size="20" Bold="True" />
-          </Attributes>
-        </Element>
-      </StyledText>
-    </TextObject>
-  </ObjectInfo>
-
-  <ObjectInfo>
-    <TextObject>
-      <Name>QTY</Name>
-      <Bounds X="2200" Y="610" Width="760" Height="280" />
-      <StyledText>
-        <Element>
-          <String>QTY</String>
-          <Attributes>
-            <Font Family="Arial" Size="18" Bold="True" />
-          </Attributes>
-        </Element>
-      </StyledText>
-    </TextObject>
-  </ObjectInfo>
-</DieCutLabel>
-`;
-
-  /* ---------------- BUILD LABEL INSTANCE ---------------- */
-
-  const buildLabel = (data) => {
-    const label = window.dymo.label.framework.openLabelXml(getLabelXml());
-
-    label.setObjectText("TYPE", String(data.type || ""));
-    label.setObjectText("WEB", "WEB");
-    label.setObjectText("STANDARD", "STANDARD");
-    label.setObjectText("ORDERID", String(data.orderId || ""));
-    label.setObjectText("PRODUCT", String(data.product || ""));
-    label.setObjectText("SKU", String(data.sku || ""));
-    label.setObjectText("QTY", String(data.qty || ""));
-
-    return label;
-  };
-
-  /* ---------------- SINGLE PRINT ---------------- */
-
-  const printLabel = async (data) => {
-    if (
-      !window.dymo ||
-      !window.dymo.label ||
-      !window.dymo.label.framework ||
-      !printer
-    ) {
-      throw new Error("DYMO printer not detected");
-    }
-
-    const label = buildLabel(data);
-    label.print(printer);
-
-    // Small gap keeps bulk printing stable
-    await sleep(350);
-  };
-
-  /* ---------------- PREVIEW LABEL ---------------- */
-
-  const previewLabel = (data) => {
-    try {
-      if (
-        !window.dymo ||
-        !window.dymo.label ||
-        !window.dymo.label.framework ||
-        !printer
-      ) {
-        showSnackbar("Printer not ready for preview", "warning");
-        return;
-      }
-
-      const label = buildLabel(data);
-      const png = label.render();
-      const previewWindow = window.open("", "_blank");
-
-      if (previewWindow) {
-        previewWindow.document.write(`
-          <html>
-            <head><title>Label Preview</title></head>
-            <body style="margin:20px;font-family:Arial">
-              <h3>Label Preview</h3>
-              <img src="data:image/png;base64,${png}" alt="Label Preview" />
-            </body>
-          </html>
-        `);
-        previewWindow.document.close();
-      }
-    } catch (err) {
-      console.error("Preview error:", err);
-      showSnackbar("Failed to generate preview", "error");
-    }
-  };
-
-  /* ---------------- CREATE PRINT JOBS ---------------- */
-
-  const getSelectedPrintJobs = () => {
-    const jobs = [];
-
-    Object.keys(selectedLabels).forEach((labelId) => {
-      if (!selectedLabels[labelId]) return;
-
-      const [orderId, itemId] = labelId.split("-");
-
-      const order = orders.find((o) => String(o.id) === String(orderId));
-      const item = order?.items?.find((i) => String(i.id) === String(itemId));
-
-      if (!order || !item) return;
-
-      const type = order.items?.length > 1 ? "M" : "S";
-
-      jobs.push({
-        labelId,
-        type,
-        sku: item.sku,
-        product: getShortTitle(item.product_name),
-        qty: item.quantity,
-        orderId: order.external_order_id,
-      });
-    });
-
-    return jobs;
-  };
-
-  /* ---------------- PRINT SELECTED SEQUENTIALLY ---------------- */
-
-  const handlePrintSelected = async () => {
-    if (isPrinting) return;
-
-    const jobs = getSelectedPrintJobs();
-
-    if (!jobs.length) {
-      showSnackbar("Please select at least one label", "warning");
-      return;
-    }
-
-    if (
-      !window.dymo ||
-      !window.dymo.label ||
-      !window.dymo.label.framework ||
-      !printer
-    ) {
-      showSnackbar("DYMO printer not detected", "error");
-      return;
-    }
-
-    setIsPrinting(true);
-    setFailedPrints([]);
-    setPrintProgress({
-      total: jobs.length,
-      printed: 0,
-      failed: 0,
-    });
-
-    const failed = [];
-    let printedCount = 0;
-    let failedCount = 0;
-
-    for (const job of jobs) {
-      try {
-        await printLabel(job);
-        printedCount += 1;
-
-        setPrintProgress({
-          total: jobs.length,
-          printed: printedCount,
-          failed: failedCount,
-        });
-      } catch (error) {
-        console.error("Print failed for label:", job, error);
-
-        failed.push({
-          ...job,
-          error: error?.message || "Print failed",
-        });
-
-        failedCount += 1;
-
-        setPrintProgress({
-          total: jobs.length,
-          printed: printedCount,
-          failed: failedCount,
-        });
-      }
-    }
-
-    setFailedPrints(failed);
-    setIsPrinting(false);
-
-    if (failed.length > 0) {
-      showSnackbar(
-        `Printing finished. Printed: ${printedCount}, Failed: ${failed.length}`,
-        "warning"
-      );
-    } else {
-      showSnackbar(`All ${printedCount} labels printed successfully`, "success");
-    }
-  };
-
-  /* ---------------- RETRY FAILED ---------------- */
-
-  const handleRetryFailed = async () => {
-    if (!failedPrints.length || isPrinting) return;
-
-    setIsPrinting(true);
-
-    const retryFailures = [];
-    let printedCount = 0;
-    let failedCount = 0;
-
-    setPrintProgress({
-      total: failedPrints.length,
-      printed: 0,
-      failed: 0,
-    });
-
-    for (const job of failedPrints) {
-      try {
-        await printLabel(job);
-        printedCount += 1;
-
-        setPrintProgress({
-          total: failedPrints.length,
-          printed: printedCount,
-          failed: failedCount,
-        });
-      } catch (error) {
-        retryFailures.push({
-          ...job,
-          error: error?.message || "Retry failed",
-        });
-
-        failedCount += 1;
-
-        setPrintProgress({
-          total: failedPrints.length,
-          printed: printedCount,
-          failed: failedCount,
-        });
-      }
-    }
-
-    setFailedPrints(retryFailures);
-    setIsPrinting(false);
-
-    if (retryFailures.length > 0) {
-      showSnackbar(
-        `Retry completed. Still failed: ${retryFailures.length}`,
-        "warning"
-      );
-    } else {
-      showSnackbar("All failed labels printed successfully", "success");
-    }
+    saveAs(
+      new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      }),
+      `Order_Labels_${Date.now()}.xlsx`
+    );
   };
 
   return (
-    <Box p={3}>
-      <Typography variant="h5" fontWeight="bold" mb={2}>
-        Order Labels
-      </Typography>
-
-      <Box
-        display="flex"
-        gap={2}
-        mb={3}
-        flexWrap="wrap"
-        alignItems="center"
-      >
-        <TextField
-          type="date"
-          label="Start Date"
-          InputLabelProps={{ shrink: true }}
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          size="small"
-        />
-
-        <TextField
-          type="date"
-          label="End Date"
-          InputLabelProps={{ shrink: true }}
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          size="small"
-        />
-
-        <Button variant="outlined" onClick={selectAll} disabled={isPrinting}>
-          Select All
-        </Button>
-
-        <Button variant="outlined" onClick={clearSelection} disabled={isPrinting}>
-          Clear Selection
-        </Button>
-
-        <Button variant="outlined" onClick={initDymo} disabled={isPrinting}>
-          Refresh Printer
-        </Button>
-
-        <Button
-          variant="contained"
-          onClick={handlePrintSelected}
-          disabled={isPrinting}
-        >
-          {isPrinting ? "Printing..." : "Print Labels"}
-        </Button>
-
-        {failedPrints.length > 0 && (
-          <Button
-            variant="contained"
-            color="warning"
-            onClick={handleRetryFailed}
-            disabled={isPrinting}
-          >
-            Retry Failed ({failedPrints.length})
-          </Button>
-        )}
-      </Box>
-
-      <Box mb={2}>
-        <Typography variant="body2">
-          <strong>Selected Printer:</strong> {printer || "Not detected"}
-        </Typography>
-        <Typography variant="body2">
-          <strong>Available Printers:</strong>{" "}
-          {printerList.length
-            ? printerList.map((p) => p.name).join(", ")
-            : "None"}
-        </Typography>
-      </Box>
-
-      {isPrinting && (
-        <Box display="flex" alignItems="center" gap={2} mb={2}>
-          <CircularProgress size={22} />
-          <Typography variant="body2">
-            Printing {printProgress.printed + printProgress.failed} /{" "}
-            {printProgress.total} | Printed: {printProgress.printed} | Failed:{" "}
-            {printProgress.failed}
-          </Typography>
-        </Box>
-      )}
-
-      <Grid container spacing={2}>
-        {filteredOrders.map((order) =>
-          order.items?.map((item) => {
-            const labelId = `${order.id}-${item.id}`;
-            const orderType = order.items?.length > 1 ? "M" : "S";
-
-            const previewData = {
-              type: orderType,
-              sku: item.sku,
-              product: getShortTitle(item.product_name),
-              qty: item.quantity,
-              orderId: order.external_order_id,
-            };
-
-            return (
-              <Grid item key={labelId}>
-                <Box display="flex" gap={1} alignItems="flex-start">
-                  <Checkbox
-                    checked={!!selectedLabels[labelId]}
-                    onChange={() => toggleSelect(labelId)}
-                    disabled={isPrinting}
-                  />
-
-                  <Paper
-                    sx={{
-                      width: "3.5in",
-                      minHeight: "1.25in",
-                      border: "1px solid #bbb",
-                      display: "flex",
-                      fontFamily: "Arial",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: "30%",
-                        borderRight: "1px solid #ddd",
-                        p: 0.5,
-                      }}
-                    >
-                      <Typography fontSize={10}>{orderType}</Typography>
-                      <Typography fontSize={9}>WEB</Typography>
-                      <Typography fontSize={9}>STANDARD</Typography>
-                      <Typography fontSize={9}>
-                        {order.external_order_id}
-                      </Typography>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        width: "40%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        px: 1,
-                        textAlign: "center",
-                      }}
-                    >
-                      <Typography fontSize={11}>
-                        {getShortTitle(item.product_name)}
-                      </Typography>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        width: "30%",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                        alignItems: "flex-end",
-                        p: 0.5,
-                      }}
-                    >
-                      <Typography fontSize={20} fontWeight="bold">
-                        {item.sku}
-                      </Typography>
-
-                      <Typography fontSize={18} fontWeight="bold">
-                        {item.quantity}
-                      </Typography>
-                    </Box>
-                  </Paper>
-
-                  <Button
-                    size="small"
-                    variant="text"
-                    onClick={() => previewLabel(previewData)}
-                    disabled={isPrinting}
-                  >
-                    Preview
-                  </Button>
-                </Box>
-              </Grid>
-            );
-          })
-        )}
-      </Grid>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3500}
-        onClose={closeSnackbar}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert onClose={closeSnackbar} severity={snackbar.severity} variant="filled">
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+    <button type="button" onClick={downloadOrderLabels}>
+      Download Order Labels
+    </button>
   );
 };
 
-export default OrderLabel;
+export default OrderLabelTest;

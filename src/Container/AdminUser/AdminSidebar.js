@@ -294,6 +294,7 @@ const commonItems = [
   { text: 'Orders', icon: <BadgeIcon />, path: '/admin-user/orders' },
   { text: 'Employees', icon: <PeopleIcon />, path: '/admin-user/employees' },
   { text: 'Order Label', icon: <BadgeIcon />, path: '/admin-user/order-label' },
+  { text: 'Batches', icon: <LocalPharmacyIcon />, path: '/admin-user/batches' },
 ];
 
 const adminGroups = [
