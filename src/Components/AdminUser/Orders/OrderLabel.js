@@ -278,7 +278,7 @@ const OrderLabel = () => {
         product: item.product_name,
         qty: item.quantity,
         externalOrderId: item.external_order_id,
-        source: item.order_source || "WEB",
+        source: "WEB",
         status: item.processing_status_display || item.processing_status,
         date: item.order_date
           ? new Date(item.order_date).toLocaleString()
