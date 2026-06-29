@@ -35,6 +35,11 @@ const OrderLabel = () => {
 
   const accessToken = getDecryptedAccessToken();
 
+  const [page, setPage] = useState(1);
+const [nextUrl, setNextUrl] = useState(null);
+const [previousUrl, setPreviousUrl] = useState(null);
+const [count, setCount] = useState(0);
+
   const headers = useMemo(
     () => ({
       Authorization: `Bearer ${accessToken?.replace(/(^"|"$)/g, "")}`,
@@ -43,41 +48,69 @@ const OrderLabel = () => {
     [accessToken]
   );
 
-  const fetchAllOrders = useCallback(async () => {
+  // const fetchAllOrders = useCallback(async () => {
+  //   try {
+  //     setLoading(true);
+  //     setError("");
+
+  //     let allOrders = [];
+  //     let nextUrl = "orders/with-items/";
+
+  //     while (nextUrl) {
+  //       const response = await ApiServices.get(nextUrl, headers);
+  //       const data = response?.data;
+
+  //       if (!data) break;
+
+  //       allOrders = [...allOrders, ...(data.results || [])];
+
+  //       if (data.next) {
+  //         try {
+  //           const url = new URL(data.next);
+  //           nextUrl = `${url.pathname.replace("/api/v1/", "")}${url.search}`;
+  //         } catch {
+  //           nextUrl = null;
+  //         }
+  //       } else {
+  //         nextUrl = null;
+  //       }
+  //     }
+
+  //     allOrders.sort(
+  //       (a, b) =>
+  //         new Date(b.created_at || b.order_date) -
+  //         new Date(a.created_at || a.order_date)
+  //     );
+
+  //     setOrders(allOrders);
+  //   } catch (err) {
+  //     console.error(err);
+  //     setError("Failed to fetch orders");
+  //     setOrders([]);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, [headers]);
+
+const fetchOrdersPage = useCallback(
+  async (pageNumber = 1) => {
     try {
       setLoading(true);
       setError("");
 
-      let allOrders = [];
-      let nextUrl = "orders/with-items/";
-
-      while (nextUrl) {
-        const response = await ApiServices.get(nextUrl, headers);
-        const data = response?.data;
-
-        if (!data) break;
-
-        allOrders = [...allOrders, ...(data.results || [])];
-
-        if (data.next) {
-          try {
-            const url = new URL(data.next);
-            nextUrl = `${url.pathname.replace("/api/v1/", "")}${url.search}`;
-          } catch {
-            nextUrl = null;
-          }
-        } else {
-          nextUrl = null;
-        }
-      }
-
-      allOrders.sort(
-        (a, b) =>
-          new Date(b.created_at || b.order_date) -
-          new Date(a.created_at || a.order_date)
+      const response = await ApiServices.get(
+        `orders/with-items/?page=${pageNumber}`,
+        headers
       );
 
-      setOrders(allOrders);
+      const data = response?.data;
+
+      setOrders(data?.results || []);
+      setCount(data?.count || 0);
+      setNextUrl(data?.next || null);
+      setPreviousUrl(data?.previous || null);
+      setPage(pageNumber);
+      setSelectedItems([]);
     } catch (err) {
       console.error(err);
       setError("Failed to fetch orders");
@@ -85,11 +118,35 @@ const OrderLabel = () => {
     } finally {
       setLoading(false);
     }
-  }, [headers]);
+  },
+  [headers]
+);
+useEffect(() => {
+  fetchOrdersPage(1);
+}, [fetchOrdersPage]);
+  // useEffect(() => {
+  //   fetchAllOrders();
+  // }, [fetchAllOrders]);
 
-  useEffect(() => {
-    fetchAllOrders();
-  }, [fetchAllOrders]);
+  const TIAKNIGHT_BASE_URL = "https://www.tiaknightfabrics.co.uk";
+
+const buildChildProductUrl = (childProductUrl) => {
+  if (!childProductUrl) return TIAKNIGHT_BASE_URL;
+
+  if (childProductUrl.startsWith("http")) return childProductUrl;
+
+  return `${TIAKNIGHT_BASE_URL}${childProductUrl.startsWith("/") ? "" : "/"}${childProductUrl}`;
+};
+
+const buildQrUrl = (item) => {
+  const productUrl = buildChildProductUrl(item.child_product_url);
+  const url = new URL(productUrl);
+
+  url.searchParams.set("wims_order_id", item.order_id);
+  url.searchParams.set("wims_item_id", item.id);
+
+  return url.toString();
+};
 
   const allItems = useMemo(() => {
     return orders.flatMap((order) =>
@@ -107,6 +164,8 @@ const OrderLabel = () => {
         customer_name: order.customer_name,
         customer_email: order.customer_email,
         item_count: order.items?.length || 0,
+         courier_service_code: order.courier_service_code || "",
+      courier_service_name: order.courier_service_name || "",
       }))
     );
   }, [orders]);
@@ -169,75 +228,6 @@ const OrderLabel = () => {
     );
   };
 
-  // const downloadSelectedItems = async () => {
-  //   try {
-  //     const workbook = new ExcelJS.Workbook();
-  //     const worksheet = workbook.addWorksheet("Order Labels");
-
-  //     worksheet.columns = [
-  //       { header: "Type", key: "type", width: 10 },
-  //       { header: "SKU", key: "sku", width: 20 },
-  //       { header: "Product Name", key: "product", width: 60 },
-  //       { header: "Qty", key: "qty", width: 10 },
-  //       { header: "External Order ID", key: "externalOrderId", width: 20 },
-  //       { header: "Source", key: "source", width: 15 },
-  //       { header: "Status", key: "status", width: 15 },
-  //       { header: "Date", key: "date", width: 25 },
-  //       { header: "QR URL", key: "qr", width: 70 },
-  //       { header: "Label Printed", key: "labelPrinted", width: 18 },
-  //     ];
-
-  //     worksheet.getRow(1).font = { bold: true };
-
-  //     const selected = allItems.filter((item) =>
-  //       selectedItems.includes(item.id)
-  //     );
-
-  //     selected.forEach((item) => {
-  //       worksheet.addRow({
-  //         type: item.item_count > 1 ? "M" : "S",
-  //         sku: item.sku,
-  //         product: item.product_name,
-  //         qty: item.quantity,
-  //         externalOrderId: item.external_order_id,
-  //         source: item.order_source || "WEB",
-  //         status: item.processing_status_display || item.processing_status,
-  //         date: item.order_date ? new Date(item.order_date).toLocaleString() : "",
-  //         qr: `https://wims.cloud/employee-user/order-process-item/${item.order_id}/${item.id}`,
-  //         labelPrinted: item.lable_printed ? "Printed" : "Pending",
-  //       });
-  //     });
-
-  //     worksheet.eachRow((row) => {
-  //       row.eachCell((cell) => {
-  //         cell.alignment = {
-  //           vertical: "middle",
-  //           horizontal: "center",
-  //           wrapText: true,
-  //         };
-
-  //         cell.border = {
-  //           top: { style: "thin" },
-  //           left: { style: "thin" },
-  //           right: { style: "thin" },
-  //           bottom: { style: "thin" },
-  //         };
-  //       });
-  //     });
-
-  //     const buffer = await workbook.xlsx.writeBuffer();
-
-  //     saveAs(
-  //       new Blob([buffer], {
-  //         type:
-  //           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  //       }),
-  //       `Order_Item_Labels_${Date.now()}.xlsx`
-  //     );
-  //   } catch (err) {
-  //     console.error("Download Error:", err);
-  //   }
-  // };
 
 
   const downloadSelectedItems = async () => {
@@ -267,6 +257,7 @@ const OrderLabel = () => {
       { header: "Date", key: "date", width: 25 },
       { header: "QR URL", key: "qr", width: 70 },
       { header: "Label Printed", key: "labelPrinted", width: 18 },
+      { header: "Courier", key: "courier_service_code", width: 18 },
     ];
 
     worksheet.getRow(1).font = { bold: true };
@@ -279,11 +270,13 @@ const OrderLabel = () => {
         qty: item.quantity,
         externalOrderId: item.external_order_id,
         source: "WEB",
+        courier_service_code: item.courier_service_code || "N/A",
         status: item.processing_status_display || item.processing_status,
         date: item.order_date
           ? new Date(item.order_date).toLocaleString()
           : "",
-        qr: `https://wims.cloud/employee-user/order-process-item/${item.order_id}/${item.id}`,
+          qr: buildQrUrl(item),
+        // qr: `https://wims.cloud/employee-user/order-process-item/${item.order_id}/${item.id}`,
         labelPrinted: item.lable_printed ? "Printed" : "Pending",
       });
     });
@@ -325,7 +318,7 @@ const OrderLabel = () => {
     );
 
     setSelectedItems([]);
-    await fetchAllOrders();
+    await fetchOrdersPage(page);
   } catch (err) {
     console.error("Download / Label Printed Error:", err);
     setError(
@@ -376,7 +369,7 @@ const OrderLabel = () => {
           Download Selected Items
         </Button>
 
-        <Button variant="outlined" onClick={fetchAllOrders}>
+        <Button variant="outlined" onClick={() => fetchOrdersPage(page)}>
           Refresh
         </Button>
 
@@ -414,6 +407,25 @@ const OrderLabel = () => {
             ))}
           </Select>
         </FormControl>
+        <Button
+  variant="outlined"
+  disabled={!previousUrl || loading}
+  onClick={() => fetchOrdersPage(page - 1)}
+>
+  Previous
+</Button>
+
+<Typography variant="body2" sx={{ alignSelf: "center" }}>
+  Page {page} | Total Orders: {count}
+</Typography>
+
+<Button
+  variant="outlined"
+  disabled={!nextUrl || loading}
+  onClick={() => fetchOrdersPage(page + 1)}
+>
+  Next
+</Button>
       </Stack>
 
       {error && (
