@@ -429,11 +429,24 @@ const OrderProcessByItem = () => {
   const stockDetail = item?.stock_detail || {};
   const productDetail = stockDetail?.product || {};
 
-  const productImage =
-    item?.parent_product_images ||
-    stockDetail?.parent_product_images ||
-    productDetail?.parent_product_images ||
-    "";
+const getFirstImageUrl = (...imageSources) => {
+  const allImages = imageSources
+    .filter(Boolean)
+    .flatMap((source) =>
+      String(source)
+        .split(/\r?\n|,/)
+        .map((url) => url.trim())
+        .filter(Boolean)
+    );
+
+  return allImages[0] || "";
+};
+
+const productImage = getFirstImageUrl(
+  item?.parent_product_images,
+  stockDetail?.parent_product_images,
+  productDetail?.parent_product_images
+);
 
   const primaryLocation = safeValue(stockDetail?.primary_location);
   const secondaryLocation = safeValue(stockDetail?.secondary_location);
@@ -1151,13 +1164,13 @@ const handleSwipeMarkComplete = async () => {
                     <AddIcon fontSize="small" />
                   </IconButton>
 
-                  <Button
+                  {/* <Button
                     onClick={handleQuantityUpdate}
                     disabled={actionLoading}
                     sx={{ ...primaryBtn, minWidth: 100 }}
                   >
                     Update
-                  </Button>
+                  </Button> */}
                 </Stack>
 
                 <Typography sx={{ mt: 1.25, fontSize: 12, color: TEXT_MUTED }}>
