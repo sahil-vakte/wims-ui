@@ -24,6 +24,11 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import ApiServices from "../../../Services/ApiServices/ApiServices";
 import { getDecryptedAccessToken } from "../../../Services/LoginUserDetails.js/LoginUserSavedDetails";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import tialogo from "../../../Assets/TK_Logo_png.png"
+import Qrimage from "../../../Assets/reviewQR.jpeg"
+import Bannerimage from "../../../Assets/Packing_Banner.jpg.jpeg"
 
 const OrderLabel = () => {
   const [orders, setOrders] = useState([]);
@@ -34,11 +39,12 @@ const OrderLabel = () => {
   const [error, setError] = useState("");
 
   const accessToken = getDecryptedAccessToken();
-
+const LOGO_PATH = tialogo; 
   const [page, setPage] = useState(1);
 const [nextUrl, setNextUrl] = useState(null);
 const [previousUrl, setPreviousUrl] = useState(null);
 const [count, setCount] = useState(0);
+const REVIEW_QR_URL = "https://www.tiaknightfabrics.co.uk/pages/reviews";
 
   const headers = useMemo(
     () => ({
@@ -307,7 +313,7 @@ const buildQrUrl = (item) => {
       }),
       `Order_Item_Labels_${Date.now()}.xlsx`
     );
-
+await downloadSelectedOrdersPdf(selected);
     await ApiServices.patch(
       "orders/items/lable-printed",
       {
@@ -343,7 +349,315 @@ const buildQrUrl = (item) => {
     selectableItemIds.some((id) => selectedItems.includes(id)) &&
     !allSelected;
 
-  return (
+
+    const getImageBase64 = async (path) => {
+  const res = await fetch(path);
+  const blob = await res.blob();
+  return await new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+};
+
+const formatOrderDate = (date) =>
+  date
+    ? new Date(date).toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      })
+    : "";
+
+const drawBox = (doc, x, y, w, h) => {
+  doc.setDrawColor(230);
+  doc.rect(x, y, w, h);
+};
+
+const getDeliveryLines = (order) =>
+  [
+    order.customer_name,
+    order.shipping_address_1,
+    order.shipping_address_2,
+    order.shipping_city,
+    order.shipping_county,
+    order.shipping_country || "UK - Mainland",
+    order.shipping_postcode,
+    order.customer_phone,
+  ].filter(Boolean);
+
+const downloadSelectedOrdersPdf = async (selected) => {
+  const doc = new jsPDF("p", "mm", "a4");
+
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+
+  const logoBase64 = await getImageBase64(LOGO_PATH);
+  const reviewQrBase64 = await getImageBase64(Qrimage);
+  const bannerBase64 = await getImageBase64(Bannerimage);
+
+  const COLORS = {
+    pink: [214, 65, 150],
+    dark: [0, 0, 0],
+    text: [25, 25, 25],
+    lightText: [80, 80, 80],
+    white: [255, 255, 255],
+  };
+
+  // Font sizes (pt).
+  // Requested: headings/titles 9, info 10, promo paragraph 8.
+  const FS = {
+    title: 9,
+    info: 10,
+    promoTitle: 9,
+    promoBody: 9.5,
+    scan: 8,
+  };
+
+  const grouped = selected.reduce((acc, item) => {
+    if (!acc[item.order_id]) acc[item.order_id] = [];
+    acc[item.order_id].push(item);
+    return acc;
+  }, {});
+
+  const drawRoundedBox = (x, y, w, h, fill = null, lineWidth = 0.32) => {
+    doc.setDrawColor(...COLORS.pink);
+    doc.setLineWidth(lineWidth);
+
+    if (fill) {
+      doc.setFillColor(...fill);
+      doc.roundedRect(x, y, w, h, 1.3, 1.3, "FD");
+    } else {
+      doc.roundedRect(x, y, w, h, 1.3, 1.3, "S");
+    }
+  };
+
+  const addFooterAndBanner = (startY) => {
+    let y = startY + 5;
+
+    if (y + 48 > pageH - 8) {
+      doc.addPage();
+      y = 12;
+    }
+
+    const policyText =
+      "If you are not happy with your fabric, please email info@tiaknight.co.uk within 14 days of receiving your order. " +
+      "Claims cannot be made on fabric that has been cut or processed. No refunds on samples, seconds fabrics and clearance/sale items.";
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...COLORS.text);
+
+    const policyLines = doc.splitTextToSize(policyText, pageW - 20);
+    doc.text(policyLines, 10, y);
+
+    y += policyLines.length * 5 + 4;
+
+    const bannerX = 10;
+    const bannerW = pageW - 20;
+    const bannerH = 80;
+
+    drawRoundedBox(bannerX, y, bannerW, bannerH, null, 0.3);
+
+    doc.addImage(
+      bannerBase64,
+      "JPEG",
+      bannerX + 1,
+      y + 1,
+      bannerW - 2,
+      bannerH - 2
+    );
+  };
+
+  Object.values(grouped).forEach((items, index) => {
+    if (index > 0) doc.addPage();
+
+    const first = items[0];
+    const order = orders.find((o) => o.id === first.order_id) || first;
+    const orderRef = first.external_order_id || first.order_number || "";
+
+    // Header bar
+    drawRoundedBox(8, 8, pageW - 16, 18, COLORS.white, 0.42);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(...COLORS.dark);
+    doc.text("PACKING LIST", 12, 20);
+
+    doc.addImage(logoBase64, "PNG", 73, 10, 58, 14);
+
+  doc.setFont("helvetica", "bold");
+doc.setFontSize(9);
+doc.text("CONTACT US", pageW - 55, 13.5);
+
+doc.setFont("helvetica", "normal");
+doc.setFontSize(8);
+doc.text("+44 (0116) 254 2366", pageW - 55, 17.5);
+doc.text("info@tiaknight.co.uk", pageW - 55, 21.5);
+
+    // Top cards
+    const topY = 32;
+    const gap = 3;
+    const leftX = 8;
+    const rightX = 138;
+    const leftW = 127;
+    const rightW = pageW - rightX - 8;
+
+    const cardW = (leftW - gap * 2) / 3;
+    const cardH = 22; // fits 9pt title + 10pt info
+
+    const drawTopCard = (label, value, x) => {
+      drawRoundedBox(x, topY, cardW, cardH, COLORS.white, 0.32);
+
+      // Title (9pt bold)
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(FS.title);
+      doc.setTextColor(...COLORS.dark);
+      doc.text(label, x + 3, topY + 7);
+
+      // Info (10pt normal)
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(...COLORS.text);
+      const valLines = doc.splitTextToSize(value || "-", cardW - 6);
+      doc.text(valLines, x + 3, topY + 12);
+    };
+
+    drawTopCard("ORDER REFERENCE", orderRef, leftX);
+    drawTopCard(
+      "ORDER DATE",
+      formatOrderDate(first.order_date || order.created_at),
+      leftX + cardW + gap
+    );
+    drawTopCard(
+      "DELIVERY METHOD",
+      first.courier_service_name ||
+        first.courier_service_code ||
+        order.courier_service_name ||
+        "Standard Delivery",
+      leftX + cardW * 2 + gap * 2
+    );
+
+    // Address card
+    const addressY = topY + cardH + gap;
+    const addressH = 40;
+
+    drawRoundedBox(leftX, addressY, leftW, addressH, COLORS.white, 0.32);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(FS.title);
+    doc.setTextColor(...COLORS.dark);
+    doc.text("DELIVERY ADDRESS", leftX + 3, addressY + 7);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(FS.info);
+    doc.setTextColor(...COLORS.text);
+    doc.text(getDeliveryLines(order), leftX + 3, addressY + 15);
+
+    // Promo card (right)
+    const promoH = cardH + gap + addressH;
+    drawRoundedBox(rightX, topY, rightW, promoH, COLORS.white, 0.32);
+
+    // Promo title (9pt bold)
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(FS.promoTitle);
+    doc.setTextColor(...COLORS.dark);
+    doc.text("FANCY A £50 GIFT VOUCHER?", rightX + rightW / 2, topY + 7, {
+      align: "center",
+    });
+
+    // Promo body (8pt normal)
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(FS.promoBody);
+    doc.setTextColor(...COLORS.text);
+
+    const promoBodyLines = doc.splitTextToSize(
+      "Tell us something that you love about our fabrics or post a picture of your creation and you could be in for the chance to win. For a valid entry, post your review/picture to Google Reviews or scan the QR code.",
+      rightW - 8
+    );
+    const promoBodyY = topY + 12;
+    doc.text(promoBodyLines, rightX + 4, promoBodyY);
+
+    // QR — centered horizontally, safely below body text
+    const bodyBottomY = promoBodyY + promoBodyLines.length * 3.2;
+    const qrSize = 22;
+    const scanGap = 4;
+    const bottomPad = 3;
+    const qrBlockH = qrSize + scanGap;
+
+    const qrY = Math.max(
+      bodyBottomY + 2,
+      topY + promoH - qrBlockH - bottomPad
+    );
+    const qrX = rightX + (rightW - qrSize) / 2;
+
+    doc.addImage(reviewQrBase64, "JPEG", qrX, qrY, qrSize, qrSize);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(FS.scan);
+    doc.setTextColor(...COLORS.dark);
+    doc.text("SCAN ME", rightX + rightW / 2, qrY + qrSize + scanGap, {
+      align: "center",
+    });
+
+    // Items table — start below the tallest column
+    const tableStartY = Math.max(addressY + addressH, topY + promoH) + 5;
+
+    autoTable(doc, {
+      startY: tableStartY,
+      margin: {
+        left: 8,
+        right: 8,
+        bottom: 10,
+      },
+      head: [["#", "Reference", "Product Information", "Qty"]],
+      body: items.map((item, i) => [
+        i + 1,
+        item.sku || "",
+        item.product_name || "",
+        item.quantity || "",
+      ]),
+      theme: "grid",
+      pageBreak: "auto",
+      rowPageBreak: "avoid",
+      styles: {
+        font: "helvetica",
+        fontSize: 8,
+        cellPadding: 1.8,
+        lineColor: COLORS.pink,
+        lineWidth: 0.15,
+        valign: "middle",
+        textColor: [0, 0, 0],
+        overflow: "linebreak",
+      },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        fontStyle: "bold",
+        halign: "center",
+        lineColor: COLORS.pink,
+        lineWidth: 0.25,
+      },
+      bodyStyles: { fillColor: [255, 255, 255] },
+      alternateRowStyles: { fillColor: [255, 255, 255] },
+      columnStyles: {
+        0: { cellWidth: 12, halign: "center" },
+        1: { cellWidth: 30, fontStyle: "normal" },
+        2: { cellWidth: 132 },
+        3: { cellWidth: 18, halign: "center", fontStyle: "normal" },
+      },
+    });
+
+    addFooterAndBanner(doc.lastAutoTable.finalY);
+  });
+
+  doc.save(`Packing_List_${Date.now()}.pdf`);
+};
+
+
+return (
     <Box p={3}>
       <Typography variant="h5" gutterBottom fontWeight={700}>
         Order Item Labels Download

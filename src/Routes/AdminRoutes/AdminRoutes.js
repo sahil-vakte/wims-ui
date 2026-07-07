@@ -10,7 +10,6 @@ import OrderProcessing from '../../Components/AdminUser/Orders/OrderProcessing'
 import LocationsList from '../../Components/AdminUser/Locations/LocationsList'
 import EmployeesList from '../../Components/AdminUser/Employees/EmployeesList'
 import OrderLabel from '../../Components/AdminUser/Orders/OrderLabel'
-import OrderLabelTest from '../../Components/AdminUser/Orders/OrderLabelTest'
 import OrderProcessByItem from '../../Components/AdminUser/Orders/OrderProcessByItem'
 import { Box,Breadcrumbs, Typography, IconButton } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu';
@@ -86,7 +85,6 @@ const AdminRoutes = () => {
             <Route path="/locations" element={<LocationsList />} />
             <Route path="/employees" element={<EmployeesList />} />
             <Route path="/order-label" element={<OrderLabel />} />
-            <Route path="/order-label-test" element={<OrderLabelTest />} />
             <Route path="/batches" element={<BatchesList/>} />
             <Route path="/order-process-item/:orderId/:itemId" element={<OrderProcessByItem />} />
           </Routes>
