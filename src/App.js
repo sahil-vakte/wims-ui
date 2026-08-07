@@ -26,6 +26,7 @@ import AdminRoutes from "./Routes/AdminRoutes/AdminRoutes";
 import EmployeeRoutes from "./Routes/EmployeeRoutes/EmployeeRoutes";
 import { refreshAccessToken } from "./Services/ApiServices/ApiServices";
 import { getDecryptedRefreshToken } from "./Services/LoginUserDetails.js/LoginUserSavedDetails";
+import DymoLabelPrinter from "./Components/DymoLabelPrinter";
 
 function App() {
   useEffect(() => {
@@ -49,6 +50,7 @@ function App() {
   return (
     <div className="App">
       <Routes>
+        {/* <Route path="/" element={<DymoLabelPrinter/>} /> */}
         <Route path="/*" element={<WebRoutes />} />
         <Route path="/admin-user/*" element={<AdminRoutes />} />
         <Route path="/employee-user/*" element={<EmployeeRoutes />} />

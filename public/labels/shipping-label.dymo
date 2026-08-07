@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DieCutLabel Version="8.0" Units="twips">
+  <PaperOrientation>Portrait</PaperOrientation>
+  <Id>Shipping30256</Id>
+  <PaperName>30256 Shipping</PaperName>
+  <DrawCommands>
+    <RoundRectangle X="0" Y="0" Width="3330" Height="5760" Rx="180" Ry="180" />
+  </DrawCommands>
+
+  <ObjectInfo>
+    <TextObject>
+      <Name>TITLE</Name>
+      <ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+      <BackColor Alpha="0" Red="255" Green="255" Blue="255" />
+      <LinkedObjectName></LinkedObjectName>
+      <Rotation>Rotation0</Rotation>
+      <IsMirrored>False</IsMirrored>
+      <IsVariable>True</IsVariable>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Middle</VerticalAlignment>
+      <TextFitMode>ShrinkToFit</TextFitMode>
+      <UseFullFontHeight>True</UseFullFontHeight>
+      <Verticalized>False</Verticalized>
+      <StyledText>
+        <Element>
+          <String>SHIPPING LABEL</String>
+          <Attributes>
+            <Font Family="Arial" Size="16" Bold="True" Italic="False" Underline="False" Strikeout="False" />
+            <ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+          </Attributes>
+        </Element>
+      </StyledText>
+    </TextObject>
+    <Bounds X="180" Y="180" Width="2970" Height="500" />
+  </ObjectInfo>
+
+  <ObjectInfo>
+    <TextObject>
+      <Name>NAME</Name>
+      <ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+      <BackColor Alpha="0" Red="255" Green="255" Blue="255" />
+      <LinkedObjectName></LinkedObjectName>
+      <Rotation>Rotation0</Rotation>
+      <IsMirrored>False</IsMirrored>
+      <IsVariable>True</IsVariable>
+      <HorizontalAlignment>Left</HorizontalAlignment>
+      <VerticalAlignment>Top</VerticalAlignment>
+      <TextFitMode>ShrinkToFit</TextFitMode>
+      <UseFullFontHeight>True</UseFullFontHeight>
+      <Verticalized>False</Verticalized>
+      <StyledText>
+        <Element>
+          <String>Customer Name</String>
+          <Attributes>
+            <Font Family="Arial" Size="15" Bold="True" Italic="False" Underline="False" Strikeout="False" />
+            <ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+          </Attributes>
+        </Element>
+      </StyledText>
+    </TextObject>
+    <Bounds X="220" Y="800" Width="2890" Height="620" />
+  </ObjectInfo>
+
+  <ObjectInfo>
+    <TextObject>
+      <Name>ADDRESS</Name>
+      <ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+      <BackColor Alpha="0" Red="255" Green="255" Blue="255" />
+      <LinkedObjectName></LinkedObjectName>
+      <Rotation>Rotation0</Rotation>
+      <IsMirrored>False</IsMirrored>
+      <IsVariable>True</IsVariable>
+      <HorizontalAlignment>Left</HorizontalAlignment>
+      <VerticalAlignment>Top</VerticalAlignment>
+      <TextFitMode>ShrinkToFit</TextFitMode>
+      <UseFullFontHeight>True</UseFullFontHeight>
+      <Verticalized>False</Verticalized>
+      <StyledText>
+        <Element>
+          <String>Address Line 1
+Address Line 2
+City, Postcode</String>
+          <Attributes>
+            <Font Family="Arial" Size="13" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+            <ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+          </Attributes>
+        </Element>
+      </StyledText>
+    </TextObject>
+    <Bounds X="220" Y="1500" Width="2890" Height="2100" />
+  </ObjectInfo>
+
+  <ObjectInfo>
+    <TextObject>
+      <Name>ORDER_NUMBER</Name>
+      <ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+      <BackColor Alpha="0" Red="255" Green="255" Blue="255" />
+      <LinkedObjectName></LinkedObjectName>
+      <Rotation>Rotation0</Rotation>
+      <IsMirrored>False</IsMirrored>
+      <IsVariable>True</IsVariable>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Middle</VerticalAlignment>
+      <TextFitMode>ShrinkToFit</TextFitMode>
+      <UseFullFontHeight>True</UseFullFontHeight>
+      <Verticalized>False</Verticalized>
+      <StyledText>
+        <Element>
+          <String>ORDER: ORD-0001</String>
+          <Attributes>
+            <Font Family="Arial" Size="18" Bold="True" Italic="False" Underline="False" Strikeout="False" />
+            <ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+          </Attributes>
+        </Element>
+      </StyledText>
+    </TextObject>
+    <Bounds X="220" Y="3800" Width="2890" Height="850" />
+  </ObjectInfo>
+
+  <ObjectInfo>
+    <TextObject>
+      <Name>FOOTER</Name>
+      <ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+      <BackColor Alpha="0" Red="255" Green="255" Blue="255" />
+      <LinkedObjectName></LinkedObjectName>
+      <Rotation>Rotation0</Rotation>
+      <IsMirrored>False</IsMirrored>
+      <IsVariable>True</IsVariable>
+      <HorizontalAlignment>Center</HorizontalAlignment>
+      <VerticalAlignment>Middle</VerticalAlignment>
+      <TextFitMode>ShrinkToFit</TextFitMode>
+      <UseFullFontHeight>True</UseFullFontHeight>
+      <Verticalized>False</Verticalized>
+      <StyledText>
+        <Element>
+          <String>Thank you</String>
+          <Attributes>
+            <Font Family="Arial" Size="10" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+            <ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+          </Attributes>
+        </Element>
+      </StyledText>
+    </TextObject>
+    <Bounds X="220" Y="4900" Width="2890" Height="500" />
+  </ObjectInfo>
+</DieCutLabel>
