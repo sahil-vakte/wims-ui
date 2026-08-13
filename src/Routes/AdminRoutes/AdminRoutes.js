@@ -17,6 +17,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import BatchesList from '../../Components/AdminUser/Batches/BatchesList'
 import Dashboard from '../../Components/Dashboard/Dashboard'
 import OrderBatchManager from '../../Components/AdminUser/Orders/OrderBatchManager'
+import PrintTest from '../../Components/TeslPrint'
 
 const TopBar = ({ onMenuClick }) => {
   const location = useLocation();
@@ -89,6 +90,7 @@ const AdminRoutes = () => {
             <Route path="/order-batch-manager" element={<OrderBatchManager/>} />
             <Route path="/batches" element={<BatchesList/>} />
             <Route path="/order-process-item/:orderId/:itemId" element={<OrderProcessByItem />} />
+            <Route path="/print-test" element={<PrintTest/>} />
           </Routes>
         </Box>
       </Box>
