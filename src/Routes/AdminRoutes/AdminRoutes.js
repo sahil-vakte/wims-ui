@@ -86,8 +86,8 @@ const AdminRoutes = () => {
             <Route path="/order-processing/:id" element={<OrderProcessing />} />
             <Route path="/locations" element={<LocationsList />} />
             <Route path="/employees" element={<EmployeesList />} />
-            <Route path="/order-label" element={<OrderLabel />} />
-            <Route path="/order-batch-manager" element={<OrderBatchManager/>} />
+            {/* <Route path="/order-label" element={<OrderLabel />} /> */}
+            <Route path="/order-label" element={<OrderBatchManager/>} />
             <Route path="/batches" element={<BatchesList/>} />
             <Route path="/order-process-item/:orderId/:itemId" element={<OrderProcessByItem />} />
           </Routes>
