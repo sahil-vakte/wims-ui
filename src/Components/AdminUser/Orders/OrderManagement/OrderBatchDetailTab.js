@@ -1942,6 +1942,11 @@
 
 
 
+
+
+
+
+
 import React, {
   useCallback,
   useEffect,
@@ -1991,6 +1996,13 @@ import Bannerimagee from "../../../../Assets/Packing_Banner.jpg.jpeg";
 
 const BATCH_API = "order-batches/";
 
+/*
+ * Keep your existing corrected DYMO template here:
+ *
+ * public/
+ *   labels/
+ *     tiaknight-product-label-fixed.dymo
+ */
 const DYMO_LABEL_TEMPLATE =
   `${process.env.PUBLIC_URL}/labels/tiaknight-product-label-fixed.dymo`;
 
@@ -2001,9 +2013,9 @@ const Qrimage = Qrimagee;
 const Bannerimage = Bannerimagee;
 
 const wait = (ms) =>
-  new Promise((resolve) =>
-    window.setTimeout(resolve, ms),
-  );
+  new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
 
 const getError = (error, fallback) =>
   error?.response?.data?.detail ||
@@ -2207,7 +2219,7 @@ const StockTooltipContent = ({
 };
 
 /* ============================================================
-   COMPONENT
+   MAIN COMPONENT
    ============================================================ */
 
 const OrderBatchDetailTab = ({
@@ -2224,6 +2236,9 @@ const OrderBatchDetailTab = ({
   const [printing, setPrinting] =
     useState(false);
 
+  /*
+   * Individual row printing.
+   */
   const [
     printingItemId,
     setPrintingItemId,
@@ -2240,12 +2255,18 @@ const OrderBatchDetailTab = ({
   const [message, setMessage] =
     useState("");
 
+  /*
+   * 0 = Orders
+   * 1 = Labels
+   */
   const [
     detailContentTab,
     setDetailContentTab,
   ] = useState(0);
 
-  /* DYMO */
+  /* ==========================================================
+     DYMO STATE
+     ========================================================== */
 
   const [printers, setPrinters] =
     useState([]);
@@ -2260,7 +2281,9 @@ const OrderBatchDetailTab = ({
     setConnecting,
   ] = useState(false);
 
-  /* A4 */
+  /* ==========================================================
+     A4 STATE
+     ========================================================== */
 
   const [
     a4Printers,
@@ -2277,9 +2300,9 @@ const OrderBatchDetailTab = ({
     setConnectingA4,
   ] = useState(false);
 
-  /* ============================================================
-     DYMO FRAMEWORK
-     ============================================================ */
+  /* ==========================================================
+     GET DYMO FRAMEWORK
+     ========================================================== */
 
   const getDymoFramework =
     useCallback(() => {
@@ -2296,9 +2319,9 @@ const OrderBatchDetailTab = ({
       return framework;
     }, []);
 
-  /* ============================================================
+  /* ==========================================================
      CONNECT DYMO
-     ============================================================ */
+     ========================================================== */
 
   const connectDymo =
     useCallback(async () => {
@@ -2308,7 +2331,7 @@ const OrderBatchDetailTab = ({
         setError("");
 
         setMessage(
-          "Connecting to DYMO Web Service...",
+          "Checking DYMO Web Service...",
         );
 
         const framework =
@@ -2330,7 +2353,7 @@ const OrderBatchDetailTab = ({
                   ) {
                     reject(
                       new Error(
-                        "DYMO connection timed out. Start DYMO Connect for Desktop and its Web Service.",
+                        "DYMO connection timed out. Start DYMO Connect for Desktop.",
                       ),
                     );
                   }
@@ -2371,7 +2394,7 @@ const OrderBatchDetailTab = ({
           false
         ) {
           throw new Error(
-            "DYMO Connect Web Service was not detected. Install/start DYMO Connect for Desktop.",
+            "DYMO Connect Web Service was not detected.",
           );
         }
 
@@ -2409,12 +2432,26 @@ const OrderBatchDetailTab = ({
             },
           );
 
+        /*
+         * IMPORTANT:
+         *
+         * If no printer is physically connected,
+         * don't treat it as a fatal page error.
+         */
         if (
           !labelWriters.length
         ) {
-          throw new Error(
-            "No DYMO LabelWriter printer was detected.",
+          setPrinters([]);
+
+          setSelectedPrinter(
+            "",
           );
+
+          setMessage(
+            "DYMO Web Service is available, but no DYMO LabelWriter printer is currently connected.",
+          );
+
+          return;
         }
 
         setPrinters(
@@ -2461,9 +2498,9 @@ const OrderBatchDetailTab = ({
       }
     }, [getDymoFramework]);
 
-  /* ============================================================
-     CONNECT A4
-     ============================================================ */
+  /* ==========================================================
+     CONNECT A4 PRINTER
+     ========================================================== */
 
   const connectA4Printer =
     useCallback(async () => {
@@ -2537,6 +2574,10 @@ const OrderBatchDetailTab = ({
           normalPrinters,
         );
 
+        /*
+         * Same approach as DYMO:
+         * no A4 printer isn't fatal.
+         */
         if (
           !normalPrinters.length
         ) {
@@ -2544,9 +2585,11 @@ const OrderBatchDetailTab = ({
             "",
           );
 
-          throw new Error(
-            "No normal A4 printer was detected by QZ Tray.",
+          setMessage(
+            "No normal A4 printer is currently available. Packing-list PDF download is still available.",
           );
+
+          return;
         }
 
         setSelectedA4Printer(
@@ -2573,13 +2616,12 @@ const OrderBatchDetailTab = ({
           "",
         );
 
-        setMessage("");
-
-        setError(
-          getError(
-            err,
-            "Unable to connect to normal A4 printer.",
-          ),
+        /*
+         * Don't block the whole component
+         * because A4 isn't available.
+         */
+        setMessage(
+          "A4 printer is not available. You can still download the packing-list PDF.",
         );
       } finally {
         setConnectingA4(
@@ -2588,9 +2630,9 @@ const OrderBatchDetailTab = ({
       }
     }, []);
 
-  /* ============================================================
-     FETCH BATCH
-     ============================================================ */
+  /* ==========================================================
+     FETCH BATCH DETAILS
+     ========================================================== */
 
   const fetchDetail =
     useCallback(async () => {
@@ -2631,7 +2673,14 @@ const OrderBatchDetailTab = ({
       } finally {
         setLoading(false);
       }
-    }, [batchId, headers]);
+    }, [
+      batchId,
+      headers,
+    ]);
+
+  /* ==========================================================
+     INITIAL LOAD
+     ========================================================== */
 
   useEffect(() => {
     if (!batchId) {
@@ -2650,9 +2699,9 @@ const OrderBatchDetailTab = ({
     connectA4Printer,
   ]);
 
-  /* ============================================================
-     MAP ORDERS
-     ============================================================ */
+  /* ==========================================================
+     ORDER MAP
+     ========================================================== */
 
   const orderMap =
     useMemo(() => {
@@ -2666,9 +2715,9 @@ const OrderBatchDetailTab = ({
       );
     }, [detail]);
 
-  /* ============================================================
+  /* ==========================================================
      NORMALIZE LABEL ITEMS
-     ============================================================ */
+     ========================================================== */
 
   const labelItems =
     useMemo(() => {
@@ -2768,7 +2817,14 @@ const OrderBatchDetailTab = ({
             1,
         };
       });
-    }, [detail, orderMap]);
+    }, [
+      detail,
+      orderMap,
+    ]);
+
+  /* ==========================================================
+     ITEMS BY ORDER
+     ========================================================== */
 
   const itemsByOrder =
     useMemo(() => {
@@ -2800,9 +2856,9 @@ const OrderBatchDetailTab = ({
       return map;
     }, [labelItems]);
 
-  /* ============================================================
-     FIRST PRINT VS REPRINT
-     ============================================================ */
+  /* ==========================================================
+     PENDING LABELS
+     ========================================================== */
 
   const printableItems =
     useMemo(
@@ -2821,8 +2877,9 @@ const OrderBatchDetailTab = ({
     );
 
   /*
-   * If no pending labels remain, the
-   * batch button becomes RE-PRINT.
+   * If every print-eligible label
+   * is already printed, top button
+   * becomes RE-PRINT.
    */
   const isBatchReprint =
     labelItems.length > 0 &&
@@ -2830,11 +2887,11 @@ const OrderBatchDetailTab = ({
       0;
 
   /*
-   * First print:
-   *   pending labels only.
+   * Initial print:
+   * pending only.
    *
    * Re-print:
-   *   all labels.
+   * all labels.
    */
   const batchItemsToPrint =
     useMemo(() => {
@@ -2851,9 +2908,9 @@ const OrderBatchDetailTab = ({
       labelItems,
     ]);
 
-  /* ============================================================
-     QR URL
-     ============================================================ */
+  /* ==========================================================
+     BUILD PRODUCT QR URL
+     ========================================================== */
 
   const buildQrUrl =
     useCallback((item) => {
@@ -2902,10 +2959,10 @@ const OrderBatchDetailTab = ({
         }
 
         return url.toString();
-      } catch (error) {
+      } catch (err) {
         console.warn(
           "Unable to build product QR URL:",
-          error,
+          err,
         );
 
         const params =
@@ -2934,14 +2991,21 @@ const OrderBatchDetailTab = ({
       }
     }, []);
 
-  /* ============================================================
-     UPDATE QR INSIDE DYMO XML
-     ============================================================ */
+  /* ==========================================================
+     PREPARE DYMO XML
 
-  const replaceQrValueInDymoXml =
+     IMPORTANT FIX:
+     DesktopLabel wrapper is removed and only
+     DYMOLabel is passed to openLabelXml().
+
+     Also increases TEXT2 quantity font to 22
+     at runtime.
+     ========================================================== */
+
+  const prepareDymoLabelXml =
     useCallback(
       (
-        labelXml,
+        originalXml,
         qrUrl,
       ) => {
         const parser =
@@ -2949,7 +3013,7 @@ const OrderBatchDetailTab = ({
 
         const xmlDocument =
           parser.parseFromString(
-            labelXml,
+            originalXml,
             "application/xml",
           );
 
@@ -2964,9 +3028,47 @@ const OrderBatchDetailTab = ({
           );
         }
 
+        /*
+         * Your DYMO Connect template uses:
+         *
+         * <DesktopLabel>
+         *   <DYMOLabel>
+         *   ...
+         * </DesktopLabel>
+         *
+         * openLabelXml() must get the
+         * inner DYMOLabel only.
+         */
+        const dymoLabel =
+          xmlDocument.getElementsByTagName(
+            "DYMOLabel",
+          )[0];
+
+        if (!dymoLabel) {
+          /*
+           * Also support templates already
+           * rooted at DYMOLabel.
+           */
+          if (
+            xmlDocument.documentElement
+              ?.nodeName ===
+            "DYMOLabel"
+          ) {
+            return originalXml;
+          }
+
+          throw new Error(
+            "The label template does not contain a DYMOLabel element.",
+          );
+        }
+
+        /* ======================================================
+           QR CODE
+           ====================================================== */
+
         const qrObjects =
           Array.from(
-            xmlDocument.getElementsByTagName(
+            dymoLabel.getElementsByTagName(
               "QRCodeObject",
             ),
           );
@@ -3021,22 +3123,92 @@ const OrderBatchDetailTab = ({
             qrUrl;
         }
 
+        /* ======================================================
+           QUANTITY FONT SIZE
+
+           TEXT2 = Quantity
+           ====================================================== */
+
+        const textObjects =
+          Array.from(
+            dymoLabel.getElementsByTagName(
+              "TextObject",
+            ),
+          );
+
+        const quantityObject =
+          textObjects.find(
+            (object) => {
+              const name =
+                object.getElementsByTagName(
+                  "Name",
+                )[0];
+
+              return (
+                name?.textContent?.trim() ===
+                "TEXT2"
+              );
+            },
+          );
+
+        if (quantityObject) {
+          const fontSizes =
+            Array.from(
+              quantityObject.getElementsByTagName(
+                "FontSize",
+              ),
+            );
+
+          fontSizes.forEach(
+            (fontSizeNode) => {
+              fontSizeNode.textContent =
+                "22";
+            },
+          );
+
+          /*
+           * Give larger quantity text
+           * AlwaysFit to avoid clipping.
+           */
+          const fitModes =
+            Array.from(
+              quantityObject.getElementsByTagName(
+                "FitMode",
+              ),
+            );
+
+          fitModes.forEach(
+            (fitMode) => {
+              fitMode.textContent =
+                "AlwaysFit";
+            },
+          );
+        }
+
+        /*
+         * Return ONLY DYMOLabel.
+         */
         return new XMLSerializer().serializeToString(
-          xmlDocument,
+          dymoLabel,
         );
       },
       [],
     );
 
-  /* ============================================================
-     LOAD LABEL TEMPLATE
-     ============================================================ */
+  /* ==========================================================
+     LOAD DYMO TEMPLATE
+     ========================================================== */
 
   const loadDymoLabel =
     useCallback(
       async (qrUrl) => {
         const framework =
           getDymoFramework();
+
+        console.log(
+          "Loading DYMO template:",
+          DYMO_LABEL_TEMPLATE,
+        );
 
         const response =
           await fetch(
@@ -3056,15 +3228,70 @@ const OrderBatchDetailTab = ({
         const originalXml =
           await response.text();
 
-        const labelXml =
-          replaceQrValueInDymoXml(
+        const trimmed =
+          originalXml.trim();
+
+        /*
+         * React dev server often returns
+         * index.html when public file is missing.
+         */
+        if (
+          trimmed.startsWith(
+            "<!DOCTYPE html",
+          ) ||
+          trimmed.startsWith(
+            "<html",
+          ) ||
+          trimmed.includes(
+            "<html",
+          )
+        ) {
+          throw new Error(
+            `DYMO template was not found. React returned index.html instead. Expected: ${DYMO_LABEL_TEMPLATE}`,
+          );
+        }
+
+        if (
+          !trimmed.includes(
+            "<DesktopLabel",
+          ) &&
+          !trimmed.includes(
+            "<DYMOLabel",
+          )
+        ) {
+          throw new Error(
+            "The loaded file is not a valid DYMO label template.",
+          );
+        }
+
+        const dymoLabelXml =
+          prepareDymoLabelXml(
             originalXml,
             qrUrl,
           );
 
+        console.log(
+          "DYMO XML being opened:",
+          dymoLabelXml.substring(
+            0,
+            250,
+          ),
+        );
+
+        /*
+         * IMPORTANT:
+         *
+         * This now receives:
+         *
+         * <DYMOLabel ...>
+         *
+         * NOT:
+         *
+         * <DesktopLabel ...>
+         */
         const label =
           framework.openLabelXml(
-            labelXml,
+            dymoLabelXml,
           );
 
         const objectNames =
@@ -3073,6 +3300,11 @@ const OrderBatchDetailTab = ({
               [],
           );
 
+        console.log(
+          "DYMO objects:",
+          objectNames,
+        );
+
         return {
           label,
           objectNames,
@@ -3080,13 +3312,13 @@ const OrderBatchDetailTab = ({
       },
       [
         getDymoFramework,
-        replaceQrValueInDymoXml,
+        prepareDymoLabelXml,
       ],
     );
 
-  /* ============================================================
-     SET OBJECT TEXT
-     ============================================================ */
+  /* ==========================================================
+     SET DYMO OBJECT
+     ========================================================== */
 
   const setDymoValue =
     useCallback(
@@ -3102,7 +3334,7 @@ const OrderBatchDetailTab = ({
           )
         ) {
           console.warn(
-            `DYMO object '${objectName}' was not found.`,
+            `DYMO object not found: ${objectName}`,
           );
 
           return;
@@ -3116,9 +3348,19 @@ const OrderBatchDetailTab = ({
       [],
     );
 
-  /* ============================================================
-     POPULATE LABEL
-     ============================================================ */
+  /* ==========================================================
+     POPULATE DYMO LABEL
+
+     TEXT      Product Name
+     TEXT2     Quantity
+     TEXT3     Source
+     TEXT4     SKU
+     TEXT5     Courier
+     TEXT37    External Order ID
+     TEXT6     M / S
+     TEXT7     SCAN ME
+     DATE-TIME Old date position, now Batch Name
+     ========================================================== */
 
   const populateDymoLabel =
     useCallback(
@@ -3149,10 +3391,8 @@ const OrderBatchDetailTab = ({
           "";
 
         /*
-         * IMPORTANT:
-         *
-         * Instead of the DATE,
-         * print BATCH NAME.
+         * NEW:
+         * print batch name instead of date.
          */
         const batchName =
           detail?.batch_name ||
@@ -3223,12 +3463,7 @@ const OrderBatchDetailTab = ({
         );
 
         /*
-         * Updated template uses:
-         * BATCH-NAME
-         *
-         * Fallback to DATE-TIME is useful
-         * if an old template accidentally
-         * remains in browser cache.
+         * Supports either template name.
          */
         if (
           objectNames.includes(
@@ -3242,6 +3477,12 @@ const OrderBatchDetailTab = ({
             batchName,
           );
         } else {
+          /*
+           * Your current fixed template
+           * still has DATE-TIME.
+           *
+           * We put batch_name there.
+           */
           setDymoValue(
             label,
             objectNames,
@@ -3253,16 +3494,16 @@ const OrderBatchDetailTab = ({
         return externalOrderId;
       },
       [
-        detail?.batch_name,
-        batchId,
         buildQrUrl,
         setDymoValue,
+        detail?.batch_name,
+        batchId,
       ],
     );
 
-  /* ============================================================
-     PRINT EXACTLY ONE LABEL
-     ============================================================ */
+  /* ==========================================================
+     PRINT ONE LABEL - INTERNAL SHARED FUNCTION
+     ========================================================== */
 
   const sendSingleLabelToDymo =
     useCallback(
@@ -3271,13 +3512,7 @@ const OrderBatchDetailTab = ({
           !selectedPrinter
         ) {
           throw new Error(
-            "Select a DYMO printer before printing labels.",
-          );
-        }
-
-        if (!item) {
-          throw new Error(
-            "Label item is missing.",
+            "No DYMO printer is selected. Connect/select a DYMO printer first.",
           );
         }
 
@@ -3288,9 +3523,7 @@ const OrderBatchDetailTab = ({
           buildQrUrl(item);
 
         /*
-         * Always load a fresh template.
-         * This prevents previous label
-         * values leaking into another label.
+         * Fresh template every time.
          */
         const {
           label,
@@ -3342,9 +3575,9 @@ const OrderBatchDetailTab = ({
       ],
     );
 
-  /* ============================================================
-     INDIVIDUAL LABEL PRINT / RE-PRINT
-     ============================================================ */
+  /* ==========================================================
+     INDIVIDUAL PRINT / REPRINT
+     ========================================================== */
 
   const printSingleLabel =
     async (item) => {
@@ -3352,7 +3585,7 @@ const OrderBatchDetailTab = ({
         !selectedPrinter
       ) {
         setError(
-          "Select a DYMO printer before printing.",
+          "Connect and select a DYMO printer before printing.",
         );
 
         return;
@@ -3370,12 +3603,12 @@ const OrderBatchDetailTab = ({
             item?.lable_printed
               ? "Re-printing"
               : "Printing"
-          } ${
+          } label: ${
             item?.sku ||
             item
               ?.external_order_id ||
             item?.id
-          }...`,
+          }`,
         );
 
         await sendSingleLabelToDymo(
@@ -3383,11 +3616,10 @@ const OrderBatchDetailTab = ({
         );
 
         /*
-         * Initial print:
-         * update backend.
+         * Only first print changes
+         * lable_printed state.
          *
-         * Re-print:
-         * do not patch again.
+         * Reprint does not need another PATCH.
          */
         if (
           item?.lable_printed !==
@@ -3425,7 +3657,7 @@ const OrderBatchDetailTab = ({
         await onUpdated?.();
       } catch (err) {
         console.error(
-          "Individual DYMO label print error:",
+          "Individual DYMO print error:",
           err,
         );
 
@@ -3442,9 +3674,9 @@ const OrderBatchDetailTab = ({
       }
     };
 
-  /* ============================================================
+  /* ==========================================================
      BATCH PRINT / REPRINT
-     ============================================================ */
+     ========================================================== */
 
   const printBatch =
     async () => {
@@ -3452,7 +3684,7 @@ const OrderBatchDetailTab = ({
         !selectedPrinter
       ) {
         setError(
-          "Select a DYMO printer before printing labels.",
+          "Connect and select a DYMO printer before printing labels.",
         );
 
         return;
@@ -3460,7 +3692,7 @@ const OrderBatchDetailTab = ({
 
       if (!labelItems.length) {
         setError(
-          "There are no DYMO labels in this batch.",
+          "There are no labels in this batch.",
         );
 
         return;
@@ -3522,8 +3754,7 @@ const OrderBatchDetailTab = ({
         }
 
         /*
-         * Update backend only on
-         * first print.
+         * Only initial print updates server.
          */
         if (
           !reprinting &&
@@ -3554,7 +3785,7 @@ const OrderBatchDetailTab = ({
             reprinting
               ? "re-printed"
               : "printed"
-          } successfully on ${selectedPrinter}.`,
+          } successfully.`,
         );
 
         await fetchDetail();
@@ -3577,9 +3808,9 @@ const OrderBatchDetailTab = ({
       }
     };
 
-  /* ============================================================
+  /* ==========================================================
      PACKING LIST HELPERS
-     ============================================================ */
+     ========================================================== */
 
   const getImageBase64 =
     async (path) => {
@@ -3647,9 +3878,9 @@ const OrderBatchDetailTab = ({
       order.customer_phone,
     ].filter(Boolean);
 
-  /* ============================================================
+  /* ==========================================================
      PACKING LIST PDF
-     ============================================================ */
+     ========================================================== */
 
   const downloadSelectedOrdersPdf =
     async (selected) => {
@@ -4453,9 +4684,9 @@ const OrderBatchDetailTab = ({
       };
     };
 
-  /* ============================================================
-     PRINT PACKING LIST A4
-     ============================================================ */
+  /* ==========================================================
+     PRINT A4
+     ========================================================== */
 
   const printPackingListToA4 =
     async (pdfBase64) => {
@@ -4519,6 +4750,10 @@ const OrderBatchDetailTab = ({
 
       return true;
     };
+
+  /* ==========================================================
+     PACKING LIST ACTION
+     ========================================================== */
 
   const handlePackingList =
     async () => {
@@ -4608,9 +4843,9 @@ const OrderBatchDetailTab = ({
       }
     };
 
-  /* ============================================================
+  /* ==========================================================
      UI
-     ============================================================ */
+     ========================================================== */
 
   return (
     <Box
@@ -4621,7 +4856,9 @@ const OrderBatchDetailTab = ({
         },
       }}
     >
-      {/* HEADER */}
+      {/* ======================================================
+          HEADER
+          ====================================================== */}
 
       <Box sx={{ mb: 2 }}>
         <Stack
@@ -4698,7 +4935,9 @@ const OrderBatchDetailTab = ({
         </Box>
       ) : (
         <Stack spacing={2}>
-          {/* ALERT */}
+          {/* ==================================================
+              ALERTS
+              ================================================== */}
 
           {error && (
             <Alert
@@ -4719,9 +4958,6 @@ const OrderBatchDetailTab = ({
                 ) ||
                 message.includes(
                   "successfully",
-                ) ||
-                message.includes(
-                  "sent to",
                 )
                   ? "success"
                   : "info"
@@ -4734,7 +4970,9 @@ const OrderBatchDetailTab = ({
             </Alert>
           )}
 
-          {/* BATCH INFORMATION */}
+          {/* ==================================================
+              BATCH INFO
+              ================================================== */}
 
           <Paper
             variant="outlined"
@@ -4836,7 +5074,9 @@ const OrderBatchDetailTab = ({
             </Stack>
           </Paper>
 
-          {/* A4 PRINTER */}
+          {/* ==================================================
+              A4 PRINTER
+              ================================================== */}
 
           <Paper
             variant="outlined"
@@ -4880,7 +5120,7 @@ const OrderBatchDetailTab = ({
                   label="Normal A4 Printer"
                   disabled={
                     connectingA4 ||
-                    printing
+                    packingPrinting
                   }
                   onChange={(
                     event,
@@ -4930,7 +5170,7 @@ const OrderBatchDetailTab = ({
                 }
               >
                 {connectingA4
-                  ? "Connecting..."
+                  ? "Checking..."
                   : "Reconnect A4 Printer"}
               </Button>
 
@@ -4961,7 +5201,9 @@ const OrderBatchDetailTab = ({
             </Stack>
           </Paper>
 
-          {/* DYMO PRINTER */}
+          {/* ==================================================
+              DYMO PRINTER
+              ================================================== */}
 
           <Paper
             variant="outlined"
@@ -5005,7 +5247,9 @@ const OrderBatchDetailTab = ({
                   label="DYMO Printer"
                   disabled={
                     connecting ||
-                    printing
+                    printing ||
+                    printingItemId !==
+                      null
                   }
                   onChange={(
                     event,
@@ -5018,8 +5262,8 @@ const OrderBatchDetailTab = ({
                 >
                   {!printers.length && (
                     <MenuItem value="">
-                      No printer
-                      detected
+                      No DYMO printer
+                      connected
                     </MenuItem>
                   )}
 
@@ -5049,11 +5293,13 @@ const OrderBatchDetailTab = ({
                 }
                 disabled={
                   connecting ||
-                  printing
+                  printing ||
+                  printingItemId !==
+                    null
                 }
               >
                 {connecting
-                  ? "Connecting..."
+                  ? "Checking..."
                   : "Reconnect DYMO"}
               </Button>
 
@@ -5092,10 +5338,27 @@ const OrderBatchDetailTab = ({
                     ? `Re-print DYMO Labels (${labelItems.length})`
                     : `Print DYMO Labels (${printableItems.length})`}
               </Button>
+
+              {!selectedPrinter && (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                >
+                  Connect your
+                  DYMO printer to
+                  enable printing.
+                  Batch data and
+                  packing-list
+                  download remain
+                  available.
+                </Typography>
+              )}
             </Stack>
           </Paper>
 
-          {/* TABS */}
+          {/* ==================================================
+              TABS
+              ================================================== */}
 
           <Paper
             variant="outlined"
@@ -5116,6 +5379,20 @@ const OrderBatchDetailTab = ({
                 )
               }
               variant="fullWidth"
+              sx={{
+                borderBottom: 1,
+                borderColor:
+                  "divider",
+
+                "& .MuiTab-root":
+                  {
+                    textTransform:
+                      "none",
+
+                    fontWeight:
+                      700,
+                  },
+              }}
             >
               <Tab
                 label={`Orders (${
@@ -5130,7 +5407,9 @@ const OrderBatchDetailTab = ({
             </Tabs>
           </Paper>
 
-          {/* ORDERS */}
+          {/* ==================================================
+              ORDERS TABLE
+              ================================================== */}
 
           {detailContentTab ===
             0 && (
@@ -5218,6 +5497,16 @@ const OrderBatchDetailTab = ({
                             order.id
                           }
                           hover
+                          sx={{
+                            bgcolor:
+                              stockState ===
+                              "INSUFFICIENT"
+                                ? "#fff1f2"
+                                : stockState ===
+                                    "LOW"
+                                  ? "#fffbeb"
+                                  : undefined,
+                          }}
                         >
                           <TableCell>
                             <Typography
@@ -5266,6 +5555,8 @@ const OrderBatchDetailTab = ({
                             {stockState ===
                             "INSUFFICIENT" ? (
                               <Tooltip
+                                arrow
+                                placement="top"
                                 title={
                                   <StockTooltipContent
                                     items={
@@ -5278,11 +5569,17 @@ const OrderBatchDetailTab = ({
                                   size="small"
                                   color="error"
                                   label={`${insufficientCount} insufficient`}
+                                  sx={{
+                                    cursor:
+                                      "help",
+                                  }}
                                 />
                               </Tooltip>
                             ) : stockState ===
                               "LOW" ? (
                               <Tooltip
+                                arrow
+                                placement="top"
                                 title={
                                   <StockTooltipContent
                                     items={
@@ -5295,6 +5592,10 @@ const OrderBatchDetailTab = ({
                                   size="small"
                                   color="warning"
                                   label={`${lowCount} low stock`}
+                                  sx={{
+                                    cursor:
+                                      "help",
+                                  }}
                                 />
                               </Tooltip>
                             ) : (
@@ -5333,7 +5634,9 @@ const OrderBatchDetailTab = ({
             </TableContainer>
           )}
 
-          {/* LABELS */}
+          {/* ==================================================
+              LABELS TABLE
+              ================================================== */}
 
           {detailContentTab ===
             1 && (
@@ -5341,7 +5644,7 @@ const OrderBatchDetailTab = ({
               component={Paper}
               variant="outlined"
               sx={{
-                maxHeight: 500,
+                maxHeight: 520,
               }}
             >
               <Table
@@ -5412,12 +5715,24 @@ const OrderBatchDetailTab = ({
                             item,
                           );
 
+                        const isThisPrinting =
+                          printingItemId ===
+                          item.id;
+
                         return (
                           <TableRow
                             key={
                               item.id
                             }
                             hover
+                            sx={{
+                              bgcolor:
+                                insufficient
+                                  ? "#fff1f2"
+                                  : low
+                                    ? "#fffbeb"
+                                    : undefined,
+                            }}
                           >
                             <TableCell>
                               <Typography
@@ -5457,6 +5772,8 @@ const OrderBatchDetailTab = ({
 
                             <TableCell>
                               <Tooltip
+                                arrow
+                                placement="top"
                                 title={
                                   <StockTooltipContent
                                     items={[
@@ -5468,14 +5785,26 @@ const OrderBatchDetailTab = ({
                                 <Box
                                   sx={{
                                     p: 1,
+
                                     borderRadius:
                                       1.5,
+
                                     bgcolor:
                                       insufficient
                                         ? "#fee2e2"
                                         : low
                                           ? "#fef3c7"
                                           : "#f8fafc",
+
+                                    border:
+                                      insufficient
+                                        ? "1px solid #ef4444"
+                                        : low
+                                          ? "1px solid #f59e0b"
+                                          : "1px solid #e2e8f0",
+
+                                    cursor:
+                                      "help",
                                   }}
                                 >
                                   <Typography
@@ -5499,8 +5828,14 @@ const OrderBatchDetailTab = ({
                             </TableCell>
 
                             <TableCell>
-                              {item.quantity ??
-                                0}
+                              <Typography
+                                fontWeight={
+                                  700
+                                }
+                              >
+                                {item.quantity ??
+                                  0}
+                              </Typography>
                             </TableCell>
 
                             <TableCell>
@@ -5590,12 +5925,10 @@ const OrderBatchDetailTab = ({
                                   connecting ||
                                   (printingItemId !==
                                     null &&
-                                    printingItemId !==
-                                      item.id)
+                                    !isThisPrinting)
                                 }
                                 startIcon={
-                                  printingItemId ===
-                                  item.id ? (
+                                  isThisPrinting ? (
                                     <CircularProgress
                                       size={
                                         15
@@ -5615,8 +5948,7 @@ const OrderBatchDetailTab = ({
                                     700,
                                 }}
                               >
-                                {printingItemId ===
-                                item.id
+                                {isThisPrinting
                                   ? "Printing..."
                                   : item.lable_printed
                                     ? "Re-print"
