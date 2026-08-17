@@ -2522,16 +2522,7 @@ const OrderBatchManager = ({
                         hover
                         selected={selected}
                         sx={{
-                          backgroundColor:
-                            stockState === "INSUFFICIENT"
-                              ? "error.light"
-                              : stockState === "LOW"
-                                ? "warning.light"
-                                : undefined,
-                          "& > td": {
-                            backgroundColor:
-                              stockState === "OK" ? undefined : "transparent",
-                          },
+                          backgroundColor: "transparent",
                           opacity: completed || batched ? 0.78 : 1,
                         }}
                       >

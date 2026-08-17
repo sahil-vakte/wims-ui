@@ -1632,20 +1632,7 @@ const OrderBatchDetailTab = ({
                         key={order.id}
                         hover
                         sx={{
-                          bgcolor:
-                            stockState === "INSUFFICIENT"
-                              ? "#fff1f2"
-                              : stockState === "LOW"
-                                ? "#fffbeb"
-                                : undefined,
-                          "&:hover": {
-                            bgcolor:
-                              stockState === "INSUFFICIENT"
-                                ? "#ffe4e6 !important"
-                                : stockState === "LOW"
-                                  ? "#fef3c7 !important"
-                                  : undefined,
-                          },
+                          bgcolor: "transparent",
                         }}
                       >
                         <TableCell>
@@ -1775,18 +1762,8 @@ const OrderBatchDetailTab = ({
                           key={item.id}
                           hover
                           sx={{
-                            bgcolor: insufficient
-                              ? "#fff1f2"
-                              : low
-                                ? "#fffbeb"
-                                : undefined,
-                            "&:hover": {
-                              bgcolor: insufficient
-                                ? "#ffe4e6 !important"
-                                : low
-                                  ? "#fef3c7 !important"
-                                  : undefined,
-                            },
+                            bgcolor: "transparent",
+                            
                           }}
                         >
                           <TableCell>
