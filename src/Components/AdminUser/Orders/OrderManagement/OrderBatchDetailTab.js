@@ -34,7 +34,7 @@ import Qrimagee from "../../../../Assets/reviewQR.jpeg";
 import Bannerimagee from "../../../../Assets/Packing_Banner.jpg.jpeg";
 
 const BATCH_API = "order-batches/";
-const DYMO_LABEL_TEMPLATE = `${process.env.PUBLIC_URL}/labels/tiaknight-product-label.dymo`;
+const DYMO_LABEL_TEMPLATE = `${process.env.PUBLIC_URL}/labels/tiaknight-product-label-fixed.dymo`;
 
 const LOW_STOCK_LIMIT = 10;
 
