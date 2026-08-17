@@ -1,1344 +1,755 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <DesktopLabel Version="1">
-
   <DYMOLabel Version="4">
-
-    <Description>
-      DYMO Label
-    </Description>
-
-    <Orientation>
-      Landscape
-    </Orientation>
-
-    <LabelName>
-      LargeAddress 1983172
-    </LabelName>
-
-    <InitialLength>
-      0
-    </InitialLength>
-
-    <BorderStyle>
-      SolidLine
-    </BorderStyle>
-
+    <Description>DYMO Label</Description>
+    <Orientation>Landscape</Orientation>
+    <LabelName>LargeAddress 1983172</LabelName>
+    <InitialLength>0</InitialLength>
+    <BorderStyle>SolidLine</BorderStyle>
     <DYMORect>
-
       <DYMOPoint>
         <X>0.22333334</X>
         <Y>0.060000002</Y>
       </DYMOPoint>
-
       <Size>
         <Width>3.2033331</Width>
         <Height>1.3066665</Height>
       </Size>
-
     </DYMORect>
-
     <BorderColor>
       <SolidColorBrush>
-        <Color
-          A="1"
-          R="0"
-          G="0"
-          B="0"
-        />
+        <Color A="1" R="0" G="0" B="0" />
       </SolidColorBrush>
     </BorderColor>
-
-    <BorderThickness>
-      1
-    </BorderThickness>
-
-    <Show_Border>
-      False
-    </Show_Border>
-
-    <HasFixedLength>
-      False
-    </HasFixedLength>
-
-    <FixedLengthValue>
-      0
-    </FixedLengthValue>
-
+    <BorderThickness>1</BorderThickness>
+    <Show_Border>False</Show_Border>
+    <HasFixedLength>False</HasFixedLength>
+    <FixedLengthValue>0</FixedLengthValue>
     <DynamicLayoutManager>
-
-      <RotationBehavior>
-        ClearObjects
-      </RotationBehavior>
-
+      <RotationBehavior>ClearObjects</RotationBehavior>
       <LabelObjects>
-
-        <!-- =====================================================
-             BATCH NAME
-
-             This replaces the previous DATE-TIME object.
-             ===================================================== -->
-
         <TextObject>
-
-          <Name>
-            BATCH-NAME
-          </Name>
-
+          <Name>DATE-TIME</Name>
           <Brushes>
-
-            <BackgroundBrush>
-              <SolidColorBrush>
-                <Color
-                  A="0"
-                  R="1"
-                  G="1"
-                  B="1"
-                />
-              </SolidColorBrush>
-            </BackgroundBrush>
-
-            <BorderBrush>
-              <SolidColorBrush>
-                <Color
-                  A="1"
-                  R="0"
-                  G="0"
-                  B="0"
-                />
-              </SolidColorBrush>
-            </BorderBrush>
-
-            <StrokeBrush>
-              <SolidColorBrush>
-                <Color
-                  A="1"
-                  R="0"
-                  G="0"
-                  B="0"
-                />
-              </SolidColorBrush>
-            </StrokeBrush>
-
-            <FillBrush>
-              <SolidColorBrush>
-                <Color
-                  A="0"
-                  R="0"
-                  G="0"
-                  B="0"
-                />
-              </SolidColorBrush>
-            </FillBrush>
-
-          </Brushes>
-
-          <Rotation>
-            Rotation0
-          </Rotation>
-
-          <OutlineThickness>
-            1
-          </OutlineThickness>
-
-          <IsOutlined>
-            False
-          </IsOutlined>
-
-          <BorderStyle>
-            SolidLine
-          </BorderStyle>
-
-          <Margin>
-            <DYMOThickness
-              Left="0"
-              Top="0"
-              Right="0"
-              Bottom="0"
-            />
-          </Margin>
-
-          <HorizontalAlignment>
-            Right
-          </HorizontalAlignment>
-
-          <VerticalAlignment>
-            Middle
-          </VerticalAlignment>
-
-          <FitMode>
-            AlwaysFit
-          </FitMode>
-
-          <IsVertical>
-            False
-          </IsVertical>
-
-          <FormattedText>
-
-            <FitMode>
-              AlwaysFit
-            </FitMode>
-
-            <HorizontalAlignment>
-              Right
-            </HorizontalAlignment>
-
-            <VerticalAlignment>
-              Middle
-            </VerticalAlignment>
-
-            <IsVertical>
-              False
-            </IsVertical>
-
-            <LineTextSpan>
-
-              <TextSpan>
-
-                <Text />
-
-                <FontInfo>
-
-                  <FontName>
-                    Arial
-                  </FontName>
-
-                  <FontSize>
-                    7
-                  </FontSize>
-
-                  <IsBold>
-                    True
-                  </IsBold>
-
-                  <IsItalic>
-                    False
-                  </IsItalic>
-
-                  <IsUnderline>
-                    False
-                  </IsUnderline>
-
-                  <FontBrush>
-                    <SolidColorBrush>
-                      <Color
-                        A="1"
-                        R="0"
-                        G="0"
-                        B="0"
-                      />
-                    </SolidColorBrush>
-                  </FontBrush>
-
-                </FontInfo>
-
-              </TextSpan>
-
-            </LineTextSpan>
-
-          </FormattedText>
-
-          <ObjectLayout>
-
-            <DYMOPoint>
-              <X>2.1494586</X>
-              <Y>1.119169</Y>
-            </DYMOPoint>
-
-            <Size>
-              <Width>1.1922073</Width>
-              <Height>0.13657404</Height>
-            </Size>
-
-          </ObjectLayout>
-
-        </TextObject>
-
-        <!-- =====================================================
-             KEEP YOUR EXISTING TK LOGO IMAGEOBJECT HERE UNCHANGED.
-
-             Copy the complete:
-
-             <ImageObject>
-               <Name>TK Logo</Name>
-               ...
-               <Data>YOUR CURRENT LONG BASE64 DATA</Data>
-               ...
-             </ImageObject>
-
-             directly from your existing
-             tiaknight-product-label-fixed.dymo file.
-
-             Nothing inside the logo needs modification.
-             ===================================================== -->
-
-
-        <!-- =====================================================
-             QR CODE
-             ===================================================== -->
-
-        <QRCodeObject>
-
-          <Name>
-            QR Code
-          </Name>
-
-          <Brushes>
-
-            <BackgroundBrush>
-              <SolidColorBrush>
-                <Color
-                  A="1"
-                  R="1"
-                  G="1"
-                  B="1"
-                />
-              </SolidColorBrush>
-            </BackgroundBrush>
-
-            <BorderBrush>
-              <SolidColorBrush>
-                <Color
-                  A="1"
-                  R="0"
-                  G="0"
-                  B="0"
-                />
-              </SolidColorBrush>
-            </BorderBrush>
-
-            <StrokeBrush>
-              <SolidColorBrush>
-                <Color
-                  A="1"
-                  R="0"
-                  G="0"
-                  B="0"
-                />
-              </SolidColorBrush>
-            </StrokeBrush>
-
-            <FillBrush>
-              <SolidColorBrush>
-                <Color
-                  A="1"
-                  R="0"
-                  G="0"
-                  B="0"
-                />
-              </SolidColorBrush>
-            </FillBrush>
-
-          </Brushes>
-
-          <Rotation>
-            Rotation0
-          </Rotation>
-
-          <OutlineThickness>
-            1
-          </OutlineThickness>
-
-          <IsOutlined>
-            False
-          </IsOutlined>
-
-          <BorderStyle>
-            SolidLine
-          </BorderStyle>
-
-          <Margin>
-            <DYMOThickness
-              Left="0"
-              Top="0"
-              Right="0"
-              Bottom="0"
-            />
-          </Margin>
-
-          <BarcodeFormat>
-            QRCode
-          </BarcodeFormat>
-
-          <Data>
-            <DataString>
-              https://www.tiaknightfabrics.co.uk/
-            </DataString>
-          </Data>
-
-          <HorizontalAlignment>
-            Center
-          </HorizontalAlignment>
-
-          <VerticalAlignment>
-            Middle
-          </VerticalAlignment>
-
-          <Size>
-            AutoFit
-          </Size>
-
-          <EQRCodeType>
-            QRCodeText
-          </EQRCodeType>
-
-          <TextDataHolder>
-            <Value>
-              https://www.tiaknightfabrics.co.uk/
-            </Value>
-          </TextDataHolder>
-
-          <ObjectLayout>
-
-            <DYMOPoint>
-              <X>0.23333335</X>
-              <Y>0.087945454</Y>
-            </DYMOPoint>
-
-            <Size>
-              <Width>1.0103552</Width>
-              <Height>1.0378683</Height>
-            </Size>
-
-          </ObjectLayout>
-
-        </QRCodeObject>
-
-
-        <!-- =====================================================
-             PRODUCT NAME
-             ===================================================== -->
-
-        <TextObject>
-
-          <Name>
-            TEXT
-          </Name>
-
-          <Brushes>
-
             <BackgroundBrush>
               <SolidColorBrush>
                 <Color A="0" R="1" G="1" B="1" />
               </SolidColorBrush>
             </BackgroundBrush>
-
             <BorderBrush>
               <SolidColorBrush>
                 <Color A="1" R="0" G="0" B="0" />
               </SolidColorBrush>
             </BorderBrush>
-
             <StrokeBrush>
-              <SolidColorBrush>
-                <Color A="1" R="1" G="0" B="0" />
-              </SolidColorBrush>
-            </StrokeBrush>
-
-            <FillBrush>
-              <SolidColorBrush>
-                <Color A="0" R="0" G="0" B="0" />
-              </SolidColorBrush>
-            </FillBrush>
-
-          </Brushes>
-
-          <Rotation>
-            Rotation0
-          </Rotation>
-
-          <OutlineThickness>
-            1
-          </OutlineThickness>
-
-          <IsOutlined>
-            False
-          </IsOutlined>
-
-          <BorderStyle>
-            SolidLine
-          </BorderStyle>
-
-          <Margin>
-            <DYMOThickness
-              Left="0"
-              Top="0"
-              Right="0"
-              Bottom="0"
-            />
-          </Margin>
-
-          <HorizontalAlignment>
-            Right
-          </HorizontalAlignment>
-
-          <VerticalAlignment>
-            Middle
-          </VerticalAlignment>
-
-          <FitMode>
-            AlwaysFit
-          </FitMode>
-
-          <IsVertical>
-            False
-          </IsVertical>
-
-          <FormattedText>
-
-            <FitMode>
-              AlwaysFit
-            </FitMode>
-
-            <HorizontalAlignment>
-              Right
-            </HorizontalAlignment>
-
-            <VerticalAlignment>
-              Middle
-            </VerticalAlignment>
-
-            <IsVertical>
-              False
-            </IsVertical>
-
-            <LineTextSpan>
-
-              <TextSpan>
-
-                <Text />
-
-                <FontInfo>
-
-                  <FontName>
-                    Calibri
-                  </FontName>
-
-                  <FontSize>
-                    5.4
-                  </FontSize>
-
-                  <IsBold>
-                    True
-                  </IsBold>
-
-                  <IsItalic>
-                    False
-                  </IsItalic>
-
-                  <IsUnderline>
-                    False
-                  </IsUnderline>
-
-                  <FontBrush>
-                    <SolidColorBrush>
-                      <Color A="1" R="0" G="0" B="0" />
-                    </SolidColorBrush>
-                  </FontBrush>
-
-                </FontInfo>
-
-              </TextSpan>
-
-            </LineTextSpan>
-
-          </FormattedText>
-
-          <ObjectLayout>
-
-            <DYMOPoint>
-              <X>1.4010346</X>
-              <Y>0.66511524</Y>
-            </DYMOPoint>
-
-            <Size>
-              <Width>1.9295621</Width>
-              <Height>0.14484127</Height>
-            </Size>
-
-          </ObjectLayout>
-
-        </TextObject>
-
-
-        <!-- =====================================================
-             QUANTITY
-             Increased from 16 to 22
-             ===================================================== -->
-
-        <TextObject>
-
-          <Name>
-            TEXT2
-          </Name>
-
-          <Brushes>
-
-            <BackgroundBrush>
-              <SolidColorBrush>
-                <Color A="0" R="1" G="1" B="1" />
-              </SolidColorBrush>
-            </BackgroundBrush>
-
-            <BorderBrush>
               <SolidColorBrush>
                 <Color A="1" R="0" G="0" B="0" />
               </SolidColorBrush>
-            </BorderBrush>
-
-            <StrokeBrush>
-              <SolidColorBrush>
-                <Color A="1" R="1" G="0" B="0" />
-              </SolidColorBrush>
             </StrokeBrush>
-
             <FillBrush>
               <SolidColorBrush>
                 <Color A="0" R="0" G="0" B="0" />
               </SolidColorBrush>
             </FillBrush>
-
           </Brushes>
-
-          <Rotation>
-            Rotation0
-          </Rotation>
-
-          <OutlineThickness>
-            1
-          </OutlineThickness>
-
-          <IsOutlined>
-            False
-          </IsOutlined>
-
-          <BorderStyle>
-            SolidLine
-          </BorderStyle>
-
-          <Margin>
-            <DYMOThickness
-              Left="0"
-              Top="0"
-              Right="0"
-              Bottom="0"
-            />
-          </Margin>
-
-          <HorizontalAlignment>
-            Right
-          </HorizontalAlignment>
-
-          <VerticalAlignment>
-            Middle
-          </VerticalAlignment>
-
-          <FitMode>
-            AlwaysFit
-          </FitMode>
-
-          <IsVertical>
-            False
-          </IsVertical>
-
-          <FormattedText>
-
-            <FitMode>
-              AlwaysFit
-            </FitMode>
-
-            <HorizontalAlignment>
-              Right
-            </HorizontalAlignment>
-
-            <VerticalAlignment>
-              Middle
-            </VerticalAlignment>
-
-            <IsVertical>
-              False
-            </IsVertical>
-
-            <LineTextSpan>
-
-              <TextSpan>
-
-                <Text />
-
-                <FontInfo>
-
-                  <FontName>
-                    Calibri
-                  </FontName>
-
-                  <FontSize>
-                    22
-                  </FontSize>
-
-                  <IsBold>
-                    True
-                  </IsBold>
-
-                  <IsItalic>
-                    False
-                  </IsItalic>
-
-                  <IsUnderline>
-                    False
-                  </IsUnderline>
-
-                  <FontBrush>
-                    <SolidColorBrush>
-                      <Color A="1" R="0" G="0" B="0" />
-                    </SolidColorBrush>
-                  </FontBrush>
-
-                </FontInfo>
-
-              </TextSpan>
-
-            </LineTextSpan>
-
-          </FormattedText>
-
-          <ObjectLayout>
-
-            <DYMOPoint>
-              <X>2.540833</X>
-              <Y>0.85000000</Y>
-            </DYMOPoint>
-
-            <Size>
-              <Width>0.7836086</Width>
-              <Height>0.3000000</Height>
-            </Size>
-
-          </ObjectLayout>
-
-        </TextObject>
-
-
-        <!-- =====================================================
-             SOURCE = WEB
-             ===================================================== -->
-
-        <TextObject>
-
-          <Name>
-            TEXT3
-          </Name>
-
-          <Brushes>
-
-            <BackgroundBrush>
-              <SolidColorBrush>
-                <Color A="0" R="1" G="1" B="1" />
-              </SolidColorBrush>
-            </BackgroundBrush>
-
-            <BorderBrush>
-              <SolidColorBrush>
-                <Color A="1" R="0" G="0" B="0" />
-              </SolidColorBrush>
-            </BorderBrush>
-
-            <StrokeBrush>
-              <SolidColorBrush>
-                <Color A="1" R="1" G="0" B="0" />
-              </SolidColorBrush>
-            </StrokeBrush>
-
-            <FillBrush>
-              <SolidColorBrush>
-                <Color A="0" R="0" G="0" B="0" />
-              </SolidColorBrush>
-            </FillBrush>
-
-          </Brushes>
-
           <Rotation>Rotation0</Rotation>
           <OutlineThickness>1</OutlineThickness>
           <IsOutlined>False</IsOutlined>
           <BorderStyle>SolidLine</BorderStyle>
-
           <Margin>
             <DYMOThickness Left="0" Top="0" Right="0" Bottom="0" />
           </Margin>
-
+          <HorizontalAlignment>Right</HorizontalAlignment>
+          <VerticalAlignment>Middle</VerticalAlignment>
+          <FitMode>None</FitMode>
+          <IsVertical>False</IsVertical>
+          <FormattedText>
+            <FitMode>None</FitMode>
+            <HorizontalAlignment>Right</HorizontalAlignment>
+            <VerticalAlignment>Middle</VerticalAlignment>
+            <IsVertical>False</IsVertical>
+            <LineTextSpan>
+              <TextSpan>
+                <Text />
+                <FontInfo>
+                  <FontName>Arial</FontName>
+                  <FontSize>5</FontSize>
+                  <IsBold>False</IsBold>
+                  <IsItalic>False</IsItalic>
+                  <IsUnderline>False</IsUnderline>
+                  <FontBrush>
+                    <SolidColorBrush>
+                      <Color A="1" R="0" G="0" B="0" />
+                    </SolidColorBrush>
+                  </FontBrush>
+                </FontInfo>
+              </TextSpan>
+            </LineTextSpan>
+          </FormattedText>
+          <ObjectLayout>
+            <DYMOPoint>
+              <X>2.1494586</X>
+              <Y>1.119169</Y>
+            </DYMOPoint>
+            <Size>
+              <Width>1.1922073</Width>
+              <Height>0.13657404</Height>
+            </Size>
+          </ObjectLayout>
+        </TextObject>
+        <ImageObject>
+          <Name>TK Logo</Name>
+          <Brushes>
+            <BackgroundBrush>
+              <SolidColorBrush>
+                <Color A="0" R="1" G="1" B="1" />
+              </SolidColorBrush>
+            </BackgroundBrush>
+            <BorderBrush>
+              <SolidColorBrush>
+                <Color A="1" R="0" G="0" B="0" />
+              </SolidColorBrush>
+            </BorderBrush>
+            <StrokeBrush>
+              <SolidColorBrush>
+                <Color A="1" R="0" G="0" B="0" />
+              </SolidColorBrush>
+            </StrokeBrush>
+            <FillBrush>
+              <SolidColorBrush>
+                <Color A="0" R="0" G="0" B="0" />
+              </SolidColorBrush>
+            </FillBrush>
+          </Brushes>
+          <Rotation>Rotation0</Rotation>
+          <OutlineThickness>1</OutlineThickness>
+          <IsOutlined>False</IsOutlined>
+          <BorderStyle>SolidLine</BorderStyle>
+          <Margin>
+            <DYMOThickness Left="0" Top="0" Right="0" Bottom="0" />
+          </Margin>
+          <Data>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</Data>
+          <ScaleMode>Uniform</ScaleMode>
+          <HorizontalAlignment>Center</HorizontalAlignment>
+          <VerticalAlignment>Top</VerticalAlignment>
+          <ObjectLayout>
+            <DYMOPoint>
+              <X>2.3598914</X>
+              <Y>0.06770715</Y>
+            </DYMOPoint>
+            <Size>
+              <Width>1.0146346</Width>
+              <Height>0.28662792</Height>
+            </Size>
+          </ObjectLayout>
+        </ImageObject>
+        <QRCodeObject>
+          <Name>QR Code</Name>
+          <Brushes>
+            <BackgroundBrush>
+              <SolidColorBrush>
+                <Color A="1" R="1" G="1" B="1" />
+              </SolidColorBrush>
+            </BackgroundBrush>
+            <BorderBrush>
+              <SolidColorBrush>
+                <Color A="1" R="0" G="0" B="0" />
+              </SolidColorBrush>
+            </BorderBrush>
+            <StrokeBrush>
+              <SolidColorBrush>
+                <Color A="1" R="0" G="0" B="0" />
+              </SolidColorBrush>
+            </StrokeBrush>
+            <FillBrush>
+              <SolidColorBrush>
+                <Color A="1" R="0" G="0" B="0" />
+              </SolidColorBrush>
+            </FillBrush>
+          </Brushes>
+          <Rotation>Rotation0</Rotation>
+          <OutlineThickness>1</OutlineThickness>
+          <IsOutlined>False</IsOutlined>
+          <BorderStyle>SolidLine</BorderStyle>
+          <Margin>
+            <DYMOThickness Left="0" Top="0" Right="0" Bottom="0" />
+          </Margin>
+          <BarcodeFormat>QRCode</BarcodeFormat>
+          <Data>
+            <DataString>https://www.tiaknightfabrics.co.uk/fabrics-c1/lycra-c15/matte-nylon-lycra-c348/matte-nylon-lycra-4-way-stretch-swim-dance-fabric-q56t-p8730/s27394?wims_order_id=972&amp;wims_item_id=2932</DataString>
+          </Data>
+          <HorizontalAlignment>Center</HorizontalAlignment>
+          <VerticalAlignment>Middle</VerticalAlignment>
+          <Size>AutoFit</Size>
+          <EQRCodeType>QRCodeText</EQRCodeType>
+          <TextDataHolder>
+            <Value>https://www.tiaknightfabrics.co.uk/fabrics-c1/lycra-c15/matte-nylon-lycra-c348/matte-nylon-lycra-4-way-stretch-swim-dance-fabric-q56t-p8730/s27394?wims_order_id=972&amp;wims_item_id=2932</Value>
+          </TextDataHolder>
+          <ObjectLayout>
+            <DYMOPoint>
+              <X>0.23333335</X>
+              <Y>0.087945454</Y>
+            </DYMOPoint>
+            <Size>
+              <Width>1.0103552</Width>
+              <Height>1.0378683</Height>
+            </Size>
+          </ObjectLayout>
+        </QRCodeObject>
+        <TextObject>
+          <Name>TEXT</Name>
+          <Brushes>
+            <BackgroundBrush>
+              <SolidColorBrush>
+                <Color A="0" R="1" G="1" B="1" />
+              </SolidColorBrush>
+            </BackgroundBrush>
+            <BorderBrush>
+              <SolidColorBrush>
+                <Color A="1" R="0" G="0" B="0" />
+              </SolidColorBrush>
+            </BorderBrush>
+            <StrokeBrush>
+              <SolidColorBrush>
+                <Color A="1" R="1" G="0" B="0" />
+              </SolidColorBrush>
+            </StrokeBrush>
+            <FillBrush>
+              <SolidColorBrush>
+                <Color A="0" R="0" G="0" B="0" />
+              </SolidColorBrush>
+            </FillBrush>
+          </Brushes>
+          <Rotation>Rotation0</Rotation>
+          <OutlineThickness>1</OutlineThickness>
+          <IsOutlined>False</IsOutlined>
+          <BorderStyle>SolidLine</BorderStyle>
+          <Margin>
+            <DYMOThickness Left="0" Top="0" Right="0" Bottom="0" />
+          </Margin>
+          <HorizontalAlignment>Right</HorizontalAlignment>
+          <VerticalAlignment>Middle</VerticalAlignment>
+          <FitMode>AlwaysFit</FitMode>
+          <IsVertical>False</IsVertical>
+          <FormattedText>
+            <FitMode>AlwaysFit</FitMode>
+            <HorizontalAlignment>Right</HorizontalAlignment>
+            <VerticalAlignment>Middle</VerticalAlignment>
+            <IsVertical>False</IsVertical>
+            <LineTextSpan>
+              <TextSpan>
+                <Text />
+                <FontInfo>
+                  <FontName>Calibri</FontName>
+                  <FontSize>5.4</FontSize>
+                  <IsBold>True</IsBold>
+                  <IsItalic>False</IsItalic>
+                  <IsUnderline>False</IsUnderline>
+                  <FontBrush>
+                    <SolidColorBrush>
+                      <Color A="1" R="0" G="0" B="0" />
+                    </SolidColorBrush>
+                  </FontBrush>
+                </FontInfo>
+              </TextSpan>
+            </LineTextSpan>
+          </FormattedText>
+          <ObjectLayout>
+            <DYMOPoint>
+              <X>1.4010346</X>
+              <Y>0.66511524</Y>
+            </DYMOPoint>
+            <Size>
+              <Width>1.9295621</Width>
+              <Height>0.14484127</Height>
+            </Size>
+          </ObjectLayout>
+        </TextObject>
+        <TextObject>
+          <Name>TEXT2</Name>
+          <Brushes>
+            <BackgroundBrush>
+              <SolidColorBrush>
+                <Color A="0" R="1" G="1" B="1" />
+              </SolidColorBrush>
+            </BackgroundBrush>
+            <BorderBrush>
+              <SolidColorBrush>
+                <Color A="1" R="0" G="0" B="0" />
+              </SolidColorBrush>
+            </BorderBrush>
+            <StrokeBrush>
+              <SolidColorBrush>
+                <Color A="1" R="1" G="0" B="0" />
+              </SolidColorBrush>
+            </StrokeBrush>
+            <FillBrush>
+              <SolidColorBrush>
+                <Color A="0" R="0" G="0" B="0" />
+              </SolidColorBrush>
+            </FillBrush>
+          </Brushes>
+          <Rotation>Rotation0</Rotation>
+          <OutlineThickness>1</OutlineThickness>
+          <IsOutlined>False</IsOutlined>
+          <BorderStyle>SolidLine</BorderStyle>
+          <Margin>
+            <DYMOThickness Left="0" Top="0" Right="0" Bottom="0" />
+          </Margin>
+          <HorizontalAlignment>Right</HorizontalAlignment>
+          <VerticalAlignment>Middle</VerticalAlignment>
+          <FitMode>None</FitMode>
+          <IsVertical>False</IsVertical>
+          <FormattedText>
+            <FitMode>None</FitMode>
+            <HorizontalAlignment>Right</HorizontalAlignment>
+            <VerticalAlignment>Middle</VerticalAlignment>
+            <IsVertical>False</IsVertical>
+            <LineTextSpan>
+              <TextSpan>
+                <Text />
+                <FontInfo>
+                  <FontName>Calibri</FontName>
+                  <FontSize>16</FontSize>
+                  <IsBold>True</IsBold>
+                  <IsItalic>False</IsItalic>
+                  <IsUnderline>False</IsUnderline>
+                  <FontBrush>
+                    <SolidColorBrush>
+                      <Color A="1" R="0" G="0" B="0" />
+                    </SolidColorBrush>
+                  </FontBrush>
+                </FontInfo>
+              </TextSpan>
+            </LineTextSpan>
+          </FormattedText>
+          <ObjectLayout>
+            <DYMOPoint>
+              <X>2.540833</X>
+              <Y>0.87344867</Y>
+            </DYMOPoint>
+            <Size>
+              <Width>0.7836086</Width>
+              <Height>0.255956</Height>
+            </Size>
+          </ObjectLayout>
+        </TextObject>
+        <TextObject>
+          <Name>TEXT3</Name>
+          <Brushes>
+            <BackgroundBrush>
+              <SolidColorBrush>
+                <Color A="0" R="1" G="1" B="1" />
+              </SolidColorBrush>
+            </BackgroundBrush>
+            <BorderBrush>
+              <SolidColorBrush>
+                <Color A="1" R="0" G="0" B="0" />
+              </SolidColorBrush>
+            </BorderBrush>
+            <StrokeBrush>
+              <SolidColorBrush>
+                <Color A="1" R="1" G="0" B="0" />
+              </SolidColorBrush>
+            </StrokeBrush>
+            <FillBrush>
+              <SolidColorBrush>
+                <Color A="0" R="0" G="0" B="0" />
+              </SolidColorBrush>
+            </FillBrush>
+          </Brushes>
+          <Rotation>Rotation0</Rotation>
+          <OutlineThickness>1</OutlineThickness>
+          <IsOutlined>False</IsOutlined>
+          <BorderStyle>SolidLine</BorderStyle>
+          <Margin>
+            <DYMOThickness Left="0" Top="0" Right="0" Bottom="0" />
+          </Margin>
           <HorizontalAlignment>Left</HorizontalAlignment>
           <VerticalAlignment>Middle</VerticalAlignment>
           <FitMode>None</FitMode>
           <IsVertical>False</IsVertical>
-
           <FormattedText>
-
             <FitMode>None</FitMode>
             <HorizontalAlignment>Left</HorizontalAlignment>
             <VerticalAlignment>Middle</VerticalAlignment>
             <IsVertical>False</IsVertical>
-
             <LineTextSpan>
-
               <TextSpan>
-
                 <Text />
-
                 <FontInfo>
-
                   <FontName>Calibri</FontName>
                   <FontSize>8</FontSize>
                   <IsBold>True</IsBold>
                   <IsItalic>False</IsItalic>
                   <IsUnderline>False</IsUnderline>
-
                   <FontBrush>
                     <SolidColorBrush>
                       <Color A="1" R="0" G="0" B="0" />
                     </SolidColorBrush>
                   </FontBrush>
-
                 </FontInfo>
-
               </TextSpan>
-
             </LineTextSpan>
-
           </FormattedText>
-
           <ObjectLayout>
-
             <DYMOPoint>
               <X>1.2844144</X>
               <Y>1.101916</Y>
             </DYMOPoint>
-
             <Size>
               <Width>0.36324066</Width>
               <Height>0.17107998</Height>
             </Size>
-
           </ObjectLayout>
-
         </TextObject>
-
-
-        <!-- =====================================================
-             SKU
-             ===================================================== -->
-
         <TextObject>
-
           <Name>TEXT4</Name>
-
           <Brushes>
-
             <BackgroundBrush>
               <SolidColorBrush>
                 <Color A="0" R="1" G="1" B="1" />
               </SolidColorBrush>
             </BackgroundBrush>
-
             <BorderBrush>
               <SolidColorBrush>
                 <Color A="1" R="0" G="0" B="0" />
               </SolidColorBrush>
             </BorderBrush>
-
             <StrokeBrush>
               <SolidColorBrush>
                 <Color A="1" R="1" G="0" B="0" />
               </SolidColorBrush>
             </StrokeBrush>
-
             <FillBrush>
               <SolidColorBrush>
                 <Color A="0" R="0" G="0" B="0" />
               </SolidColorBrush>
             </FillBrush>
-
           </Brushes>
-
           <Rotation>Rotation0</Rotation>
           <OutlineThickness>1</OutlineThickness>
           <IsOutlined>False</IsOutlined>
           <BorderStyle>SolidLine</BorderStyle>
-
           <Margin>
             <DYMOThickness Left="0" Top="0" Right="0" Bottom="0" />
           </Margin>
-
           <HorizontalAlignment>Right</HorizontalAlignment>
           <VerticalAlignment>Middle</VerticalAlignment>
           <FitMode>None</FitMode>
           <IsVertical>False</IsVertical>
-
           <FormattedText>
-
             <FitMode>None</FitMode>
             <HorizontalAlignment>Right</HorizontalAlignment>
             <VerticalAlignment>Middle</VerticalAlignment>
             <IsVertical>False</IsVertical>
-
             <LineTextSpan>
-
               <TextSpan>
-
                 <Text />
-
                 <FontInfo>
-
                   <FontName>Calibri</FontName>
                   <FontSize>20</FontSize>
                   <IsBold>True</IsBold>
                   <IsItalic>False</IsItalic>
                   <IsUnderline>False</IsUnderline>
-
                   <FontBrush>
                     <SolidColorBrush>
                       <Color A="1" R="0" G="0" B="0" />
                     </SolidColorBrush>
                   </FontBrush>
-
                 </FontInfo>
-
               </TextSpan>
-
             </LineTextSpan>
-
           </FormattedText>
-
           <ObjectLayout>
-
             <DYMOPoint>
               <X>1.4149803</X>
               <Y>0.43616554</Y>
             </DYMOPoint>
-
             <Size>
               <Width>1.9454634</Width>
               <Height>0.22894967</Height>
             </Size>
-
           </ObjectLayout>
-
         </TextObject>
-
-
-        <!-- =====================================================
-             COURIER
-             ===================================================== -->
-
         <TextObject>
-
           <Name>TEXT5</Name>
-
           <Brushes>
-
             <BackgroundBrush>
               <SolidColorBrush>
                 <Color A="0" R="1" G="1" B="1" />
               </SolidColorBrush>
             </BackgroundBrush>
-
             <BorderBrush>
               <SolidColorBrush>
                 <Color A="1" R="0" G="0" B="0" />
               </SolidColorBrush>
             </BorderBrush>
-
             <StrokeBrush>
               <SolidColorBrush>
                 <Color A="1" R="1" G="0" B="0" />
               </SolidColorBrush>
             </StrokeBrush>
-
             <FillBrush>
               <SolidColorBrush>
                 <Color A="0" R="0" G="0" B="0" />
               </SolidColorBrush>
             </FillBrush>
-
           </Brushes>
-
           <Rotation>Rotation0</Rotation>
           <OutlineThickness>1</OutlineThickness>
           <IsOutlined>False</IsOutlined>
           <BorderStyle>SolidLine</BorderStyle>
-
           <Margin>
             <DYMOThickness Left="0" Top="0" Right="0" Bottom="0" />
           </Margin>
-
           <HorizontalAlignment>Left</HorizontalAlignment>
           <VerticalAlignment>Middle</VerticalAlignment>
           <FitMode>None</FitMode>
           <IsVertical>False</IsVertical>
-
           <FormattedText>
-
             <FitMode>None</FitMode>
             <HorizontalAlignment>Left</HorizontalAlignment>
             <VerticalAlignment>Middle</VerticalAlignment>
             <IsVertical>False</IsVertical>
-
             <LineTextSpan>
-
               <TextSpan>
-
                 <Text />
-
                 <FontInfo>
-
                   <FontName>Calibri</FontName>
                   <FontSize>8</FontSize>
                   <IsBold>True</IsBold>
                   <IsItalic>False</IsItalic>
                   <IsUnderline>False</IsUnderline>
-
                   <FontBrush>
                     <SolidColorBrush>
                       <Color A="1" R="0" G="0" B="0" />
                     </SolidColorBrush>
                   </FontBrush>
-
                 </FontInfo>
-
               </TextSpan>
-
             </LineTextSpan>
-
           </FormattedText>
-
           <ObjectLayout>
-
             <DYMOPoint>
               <X>1.5540488</X>
               <Y>0.95060897</Y>
             </DYMOPoint>
-
             <Size>
               <Width>1.4624581</Width>
               <Height>0.1787956</Height>
             </Size>
-
           </ObjectLayout>
-
         </TextObject>
-
-
-        <!-- =====================================================
-             EXTERNAL ORDER NUMBER
-             ===================================================== -->
-
         <TextObject>
-
           <Name>TEXT37</Name>
-
           <Brushes>
-
             <BackgroundBrush>
               <SolidColorBrush>
                 <Color A="0" R="1" G="1" B="1" />
               </SolidColorBrush>
             </BackgroundBrush>
-
             <BorderBrush>
               <SolidColorBrush>
                 <Color A="1" R="0" G="0" B="0" />
               </SolidColorBrush>
             </BorderBrush>
-
             <StrokeBrush>
               <SolidColorBrush>
                 <Color A="1" R="1" G="0" B="0" />
               </SolidColorBrush>
             </StrokeBrush>
-
             <FillBrush>
               <SolidColorBrush>
                 <Color A="0" R="0" G="0" B="0" />
               </SolidColorBrush>
             </FillBrush>
-
           </Brushes>
-
           <Rotation>Rotation0</Rotation>
           <OutlineThickness>1</OutlineThickness>
           <IsOutlined>False</IsOutlined>
           <BorderStyle>SolidLine</BorderStyle>
-
           <Margin>
             <DYMOThickness Left="0" Top="0" Right="0" Bottom="0" />
           </Margin>
-
           <HorizontalAlignment>Left</HorizontalAlignment>
           <VerticalAlignment>Middle</VerticalAlignment>
           <FitMode>None</FitMode>
           <IsVertical>False</IsVertical>
-
           <FormattedText>
-
             <FitMode>None</FitMode>
             <HorizontalAlignment>Left</HorizontalAlignment>
             <VerticalAlignment>Middle</VerticalAlignment>
             <IsVertical>False</IsVertical>
-
             <LineTextSpan>
-
               <TextSpan>
-
                 <Text />
-
                 <FontInfo>
-
                   <FontName>Calibri</FontName>
                   <FontSize>8</FontSize>
                   <IsBold>True</IsBold>
                   <IsItalic>False</IsItalic>
                   <IsUnderline>False</IsUnderline>
-
                   <FontBrush>
                     <SolidColorBrush>
                       <Color A="1" R="0" G="0" B="0" />
                     </SolidColorBrush>
                   </FontBrush>
-
                 </FontInfo>
-
               </TextSpan>
-
             </LineTextSpan>
-
           </FormattedText>
-
           <ObjectLayout>
-
             <DYMOPoint>
               <X>1.5333474</X>
               <Y>1.1159363</Y>
             </DYMOPoint>
-
             <Size>
               <Width>0.7744608</Width>
               <Height>0.14475495</Height>
             </Size>
-
           </ObjectLayout>
-
         </TextObject>
-
-
-        <!-- =====================================================
-             TYPE M / S
-             ===================================================== -->
-
         <TextObject>
-
           <Name>TEXT6</Name>
-
           <Brushes>
-
             <BackgroundBrush>
               <SolidColorBrush>
                 <Color A="0" R="1" G="1" B="1" />
               </SolidColorBrush>
             </BackgroundBrush>
-
             <BorderBrush>
               <SolidColorBrush>
                 <Color A="1" R="0" G="0" B="0" />
               </SolidColorBrush>
             </BorderBrush>
-
             <StrokeBrush>
               <SolidColorBrush>
                 <Color A="1" R="1" G="0" B="0" />
               </SolidColorBrush>
             </StrokeBrush>
-
             <FillBrush>
               <SolidColorBrush>
                 <Color A="0" R="0" G="0" B="0" />
               </SolidColorBrush>
             </FillBrush>
-
           </Brushes>
-
           <Rotation>Rotation0</Rotation>
           <OutlineThickness>1</OutlineThickness>
           <IsOutlined>False</IsOutlined>
           <BorderStyle>SolidLine</BorderStyle>
-
           <Margin>
             <DYMOThickness Left="0" Top="0" Right="0" Bottom="0" />
           </Margin>
-
           <HorizontalAlignment>Left</HorizontalAlignment>
           <VerticalAlignment>Middle</VerticalAlignment>
           <FitMode>None</FitMode>
           <IsVertical>False</IsVertical>
-
           <FormattedText>
-
             <FitMode>None</FitMode>
             <HorizontalAlignment>Left</HorizontalAlignment>
             <VerticalAlignment>Middle</VerticalAlignment>
             <IsVertical>False</IsVertical>
-
             <LineTextSpan>
-
               <TextSpan>
-
                 <Text />
-
                 <FontInfo>
-
                   <FontName>Calibri</FontName>
                   <FontSize>8</FontSize>
                   <IsBold>True</IsBold>
                   <IsItalic>False</IsItalic>
                   <IsUnderline>False</IsUnderline>
-
                   <FontBrush>
                     <SolidColorBrush>
                       <Color A="1" R="0" G="0" B="0" />
                     </SolidColorBrush>
                   </FontBrush>
-
                 </FontInfo>
-
               </TextSpan>
-
             </LineTextSpan>
-
           </FormattedText>
-
           <ObjectLayout>
-
             <DYMOPoint>
               <X>1.30959</X>
               <Y>0.9775069</Y>
             </DYMOPoint>
-
             <Size>
               <Width>0.30264685</Width>
               <Height>0.12500004</Height>
             </Size>
-
           </ObjectLayout>
-
         </TextObject>
-
-
-        <!-- =====================================================
-             SCAN ME
-             ===================================================== -->
-
         <TextObject>
-
           <Name>TEXT7</Name>
-
           <Brushes>
-
             <BackgroundBrush>
               <SolidColorBrush>
                 <Color A="0" R="1" G="1" B="1" />
               </SolidColorBrush>
             </BackgroundBrush>
-
             <BorderBrush>
               <SolidColorBrush>
                 <Color A="1" R="0" G="0" B="0" />
               </SolidColorBrush>
             </BorderBrush>
-
             <StrokeBrush>
               <SolidColorBrush>
                 <Color A="1" R="1" G="0" B="0" />
               </SolidColorBrush>
             </StrokeBrush>
-
             <FillBrush>
               <SolidColorBrush>
                 <Color A="0" R="0" G="0" B="0" />
               </SolidColorBrush>
             </FillBrush>
-
           </Brushes>
-
           <Rotation>Rotation0</Rotation>
           <OutlineThickness>1</OutlineThickness>
           <IsOutlined>False</IsOutlined>
           <BorderStyle>SolidLine</BorderStyle>
-
           <Margin>
             <DYMOThickness Left="0" Top="0" Right="0" Bottom="0" />
           </Margin>
-
           <HorizontalAlignment>Center</HorizontalAlignment>
           <VerticalAlignment>Middle</VerticalAlignment>
           <FitMode>None</FitMode>
           <IsVertical>False</IsVertical>
-
           <FormattedText>
-
             <FitMode>None</FitMode>
             <HorizontalAlignment>Center</HorizontalAlignment>
             <VerticalAlignment>Middle</VerticalAlignment>
             <IsVertical>False</IsVertical>
-
             <LineTextSpan>
-
               <TextSpan>
-
                 <Text />
-
                 <FontInfo>
-
                   <FontName>Calibri</FontName>
                   <FontSize>8</FontSize>
                   <IsBold>True</IsBold>
                   <IsItalic>False</IsItalic>
                   <IsUnderline>False</IsUnderline>
-
                   <FontBrush>
                     <SolidColorBrush>
                       <Color A="1" R="0" G="0" B="0" />
                     </SolidColorBrush>
                   </FontBrush>
-
                 </FontInfo>
-
               </TextSpan>
-
             </LineTextSpan>
-
           </FormattedText>
-
           <ObjectLayout>
-
             <DYMOPoint>
               <X>0.4018944</X>
               <Y>1.1258137</Y>
             </DYMOPoint>
-
             <Size>
               <Width>0.6010539</Width>
               <Height>0.125</Height>
             </Size>
-
           </ObjectLayout>
-
         </TextObject>
-
       </LabelObjects>
-
     </DynamicLayoutManager>
-
   </DYMOLabel>
-
-  <LabelApplication>
-    Blank
-  </LabelApplication>
-
+  <LabelApplication>Blank</LabelApplication>
 </DesktopLabel>
