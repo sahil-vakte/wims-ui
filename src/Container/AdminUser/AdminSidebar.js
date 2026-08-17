@@ -288,13 +288,13 @@ const palette = {
 
 const commonItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/admin-user/dashboard' },
-  { text: 'Colors Library', icon: <ViewListIcon />, path: '/admin-user/colors-library' },
+  { text: 'Orders', icon: <BadgeIcon />, path: '/admin-user/order-label' },
+  { text: 'Order Booking', icon: <BadgeIcon />, path: '/admin-user/orders' },
+  { text: 'Stock Inward', icon: <LocalPharmacyIcon />, path: '/admin-user/batches' },
   { text: 'Products', icon: <ProductionQuantityLimitsIcon />, path: '/admin-user/products' },
   { text: 'Locations', icon: <LocationOnIcon />, path: '/admin-user/locations' },
-  { text: 'Orders', icon: <BadgeIcon />, path: '/admin-user/orders' },
   { text: 'Employees', icon: <PeopleIcon />, path: '/admin-user/employees' },
-  { text: 'Order Label', icon: <BadgeIcon />, path: '/admin-user/order-label' },
-  { text: 'Batches', icon: <LocalPharmacyIcon />, path: '/admin-user/batches' },
+  { text: 'Colors Library', icon: <ViewListIcon />, path: '/admin-user/colors-library' },
 ];
 
 const adminGroups = [
