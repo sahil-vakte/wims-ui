@@ -157,7 +157,7 @@ export const clearAuthStorage = () => {
 };
 
 export const getDecryptedUserType = () => {
-  const encryptedUserType = sessionStorage.getItem("LoginUserType");
+  const encryptedUserType = localStorage.getItem("user");
   if (!encryptedUserType) return null;
 
   try {

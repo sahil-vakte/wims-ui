@@ -9,6 +9,7 @@ import OrderProcessing from '../../Components/AdminUser/Orders/OrderProcessing'
 import EmployeeSidebar from '../../Container/EmployeeUser/EmployeeSidebar'
 import OrderProcessByItem from '../../Components/AdminUser/Orders/OrderProcessByItem'
 import EmployeeHomePage from '../../Container/EmployeeUser/EmployeeHomePage'
+import InwardBatchDetails from '../../Components/AdminUser/Batches/InwardBatchDetails'
 
 
 const EmployeeRoutes = () => {
@@ -25,6 +26,7 @@ const EmployeeRoutes = () => {
           <Route path="/my-orders"  element={<OrdersList/>}/>
           <Route path="/order-processing/:id"  element={<OrderProcessing/>}/>
           <Route path="/order-process-item/:orderId/:itemId"  element={<OrderProcessByItem/>}/>
+          <Route path="/batch-process/:batchId/:rollId" element={<InwardBatchDetails/>} />
           
       </Routes>
     {/* </div> */}

@@ -19,6 +19,7 @@ import Dashboard from '../../Components/Dashboard/Dashboard'
 import OrderBatchManager from '../../Components/AdminUser/Orders/OrderBatchManager'
 import PrintTest from '../../Components/TeslPrint'
 import OrderTabs from '../../Components/AdminUser/Orders/OrderManagement/OrderTabs'
+import InwardBatchDetails from '../../Components/AdminUser/Batches/InwardBatchDetails'
 
 const TopBar = ({ onMenuClick }) => {
   const location = useLocation();
@@ -91,6 +92,7 @@ const AdminRoutes = () => {
             {/* <Route path="/order-label" element={<OrderBatchManager/>} /> */}
             <Route path="/order-label" element={<OrderTabs/>} />
             <Route path="/batches" element={<BatchesList/>} />
+            <Route path="/batch-process/:batchId/:rollId" element={<InwardBatchDetails/>} />
             <Route path="/order-process-item/:orderId/:itemId" element={<OrderProcessByItem />} />
           </Routes>
         </Box>

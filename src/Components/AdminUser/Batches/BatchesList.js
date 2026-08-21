@@ -40,6 +40,7 @@ import ApiServices from "../../../Services/ApiServices/ApiServices";
 
 import {
   getDecryptedAccessToken,
+  getDecryptedUserType,
 } from "../../../Services/LoginUserDetails.js/LoginUserSavedDetails";
 
 /*
@@ -470,7 +471,8 @@ const BatchesList = () => {
     () => getDecryptedAccessToken(),
     []
   );
-
+const UserType = getDecryptedUserType()
+console.log("UserType",UserType)
   const headers = useMemo(() => {
     if (!token) {
       return {};
