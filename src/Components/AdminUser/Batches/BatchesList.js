@@ -34,6 +34,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import PrintIcon from "@mui/icons-material/Print";
+import { QRCodeCanvas } from "qrcode.react";
 
 import BatchesAdd from "./BatchesAdd";
 import ApiServices from "../../../Services/ApiServices/ApiServices";
@@ -75,8 +76,29 @@ const DYMO_LABEL_TEMPLATE = `${process.env.PUBLIC_URL}/labels/wims-batch-roll-la
  *
  * Change only this constant if your React route is different.
  */
-const BATCH_QR_BASE_URL =
-  "https://wims.cloud/employee-user/batch-process";
+const getUserTypeObject = (userType) => {
+  if (userType && typeof userType === "object") {
+    return userType;
+  }
+
+  if (typeof userType === "string") {
+    try {
+      return JSON.parse(userType);
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
+};
+
+const getBatchRoutePrefix = (userType) => {
+  const user = getUserTypeObject(userType);
+
+  return user?.is_staff === true && user?.is_superuser === true
+    ? "admin-user"
+    : "employee-user";
+};
 
 /*
  * Used to prevent sending too many jobs to the local
@@ -157,7 +179,7 @@ const areAllRollLabelsGenerated = (batch) => {
  *
  * https://wims.cloud/employee-user/batch-process/2050/6089
  */
-const buildBatchRollQrUrl = (batch, roll) => {
+const buildBatchRollQrUrl = (batch, roll, userType) => {
   const batchId = getBatchId(batch);
   const rollId = roll?.id;
 
@@ -174,7 +196,13 @@ const buildBatchRollQrUrl = (batch, roll) => {
     );
   }
 
-  return `${BATCH_QR_BASE_URL}/${encodeURIComponent(
+  const routePrefix = getBatchRoutePrefix(userType);
+  const origin =
+    typeof window !== "undefined"
+      ? window.location.origin
+      : "https://wims.cloud";
+
+  return `${origin}/${routePrefix}/batch-process/${encodeURIComponent(
     String(batchId)
   )}/${encodeURIComponent(String(rollId))}`;
 };
@@ -471,8 +499,11 @@ const BatchesList = () => {
     () => getDecryptedAccessToken(),
     []
   );
-const UserType = getDecryptedUserType()
-console.log("UserType",UserType)
+  const UserType = useMemo(() => getDecryptedUserType(), []);
+  const userTypeObject = useMemo(
+    () => getUserTypeObject(UserType),
+    [UserType]
+  );
   const headers = useMemo(() => {
     if (!token) {
       return {};
@@ -1383,7 +1414,8 @@ console.log("UserType",UserType)
           const qrUrl =
             buildBatchRollQrUrl(
               batch,
-              roll
+              roll,
+              userTypeObject
             );
 
           setPrintMessage(
@@ -2207,11 +2239,12 @@ console.log("UserType",UserType)
                     let qrUrl = "";
 
                     try {
-                      qrUrl =
-                        buildBatchRollQrUrl(
-                          batchDetail,
-                          roll
-                        );
+                        qrUrl =
+                          buildBatchRollQrUrl(
+                            batchDetail,
+                            roll,
+                            userTypeObject
+                          );
                     } catch (err) {
                       console.error(
                         "Unable to create roll QR URL:",
@@ -2236,9 +2269,46 @@ console.log("UserType",UserType)
                             sm: "row",
                           }}
                           justifyContent="space-between"
-                          spacing={1}
+                          spacing={2}
                         >
-                          <Box>
+                          <Stack
+                            direction={{ xs: "column", sm: "row" }}
+                            spacing={2}
+                            alignItems={{ xs: "flex-start", sm: "center" }}
+                            sx={{ minWidth: 0, flex: 1 }}
+                          >
+                            {qrUrl && (
+                              <Box
+                                component="a"
+                                href={qrUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label={`Open details for roll ${roll?.roll_number ?? roll?.id}`}
+                                sx={{
+                                  display: "inline-flex",
+                                  p: 1,
+                                  border: `1px solid ${theme.border}`,
+                                  borderRadius: 2,
+                                  backgroundColor: "#fff",
+                                  flexShrink: 0,
+                                  cursor: "pointer",
+                                  transition: "box-shadow 0.2s ease, transform 0.2s ease",
+                                  "&:hover": {
+                                    boxShadow: "0 4px 14px rgba(15, 23, 42, 0.16)",
+                                    transform: "translateY(-1px)",
+                                  },
+                                }}
+                              >
+                                <QRCodeCanvas
+                                  value={qrUrl}
+                                  size={128}
+                                  level="M"
+                                  includeMargin
+                                />
+                              </Box>
+                            )}
+
+                            <Box sx={{ minWidth: 0 }}>
                             <Typography
                               sx={{
                                 fontWeight: 700,
@@ -2289,20 +2359,29 @@ console.log("UserType",UserType)
                               )}
                             </Typography>
 
-                            {qrUrl && (
-                              <Typography
-                                sx={{
-                                  mt: 0.5,
-                                  fontSize: 12,
-                                  color: theme.muted,
-                                  wordBreak:
-                                    "break-all",
-                                }}
-                              >
-                                QR: {qrUrl}
-                              </Typography>
-                            )}
-                          </Box>
+                              {qrUrl && (
+                                <Typography
+                                  component="a"
+                                  href={qrUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  sx={{
+                                    display: "block",
+                                    mt: 0.75,
+                                    fontSize: 12,
+                                    color: theme.accent,
+                                    wordBreak: "break-all",
+                                    textDecoration: "none",
+                                    "&:hover": {
+                                      textDecoration: "underline",
+                                    },
+                                  }}
+                                >
+                                  Open roll details: {qrUrl}
+                                </Typography>
+                              )}
+                            </Box>
+                          </Stack>
 
                           <Chip
                             size="small"
