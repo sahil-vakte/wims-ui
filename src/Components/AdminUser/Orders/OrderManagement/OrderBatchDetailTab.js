@@ -704,10 +704,10 @@ const OrderBatchDetailTab = ({
    * TEXT37   -> External Order ID
    * TEXT6    -> M/S
    * TEXT7    -> SCAN ME
-   * DATE-TIME-> Order/printed date
+   * DATE-TIME-> Batch name and print time
    */
   const populateDymoLabel = useCallback(
-    (label, objectNames, item) => {
+    (label, objectNames, item, batchName) => {
       const typeValue = Number(item?.item_count || 0) > 1 ? "M" : "S";
 
       const courierValue =
@@ -716,21 +716,18 @@ const OrderBatchDetailTab = ({
       const externalOrderId =
         item?.external_order_id || item?.order_number || "";
 
-      const parsedDate = new Date(
-        item?.order_date || item?.created_at || Date.now(),
-      );
+      const printTime = new Date();
 
-      const dateValue = Number.isNaN(parsedDate.getTime())
+      const dateValue = Number.isNaN(printTime.getTime())
         ? ""
-        : parsedDate.toLocaleString("en-GB", {
-            weekday: "long",
+        : `${batchName || ""} | ${printTime.toLocaleString("en-GB", {
             day: "2-digit",
             month: "long",
             year: "numeric",
             hour: "2-digit",
             minute: "2-digit",
             hour12: false,
-          });
+          })}`;
 
       setDymoValue(label, objectNames, "QR Code", buildQrUrl(item));
 
@@ -1247,7 +1244,12 @@ const OrderBatchDetailTab = ({
 
         const { label, objectNames } = await loadDymoLabel(qrUrl);
 
-        const externalOrderId = populateDymoLabel(label, objectNames, item);
+        const externalOrderId = populateDymoLabel(
+          label,
+          objectNames,
+          item,
+          detail?.batch_name,
+        );
 
         const printParamsXml = framework.createLabelWriterPrintParamsXml({
           copies: 1,
