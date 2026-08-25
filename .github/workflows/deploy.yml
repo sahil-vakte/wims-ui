@@ -27,7 +27,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Build application
         run: npm run build
@@ -58,9 +58,15 @@ jobs:
             git reset --hard origin/main
 
             echo "Installing production dependencies..."
-            npm ci
+            npm ci --legacy-peer-deps
 
             echo "Building production application using server .env..."
             npm run build
+
+            echo "Testing Nginx configuration..."
+            sudo nginx -t
+
+            echo "Reloading Nginx..."
+            sudo systemctl reload nginx
 
             echo "Deployment completed successfully."
