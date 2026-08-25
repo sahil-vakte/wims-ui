@@ -64,7 +64,9 @@ jobs:
             npm ci --legacy-peer-deps
 
             echo "Building production application using server .env..."
-            CI=false npm run build
+            export CI=false
+            export NODE_OPTIONS="--max-old-space-size=1536"
+            npm run build
 
             echo "Testing Nginx configuration..."
             sudo nginx -t
