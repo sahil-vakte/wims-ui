@@ -133,7 +133,7 @@ const getDymoQuantity = (item) => {
   const category = getItemCategory(item);
 
   if (category === "SAMPLE") {
-    return "S";
+    return "SAMPLE";
   }
 
   if (category === "PERSONALIZATION") {
