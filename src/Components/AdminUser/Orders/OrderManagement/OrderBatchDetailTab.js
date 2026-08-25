@@ -79,6 +79,70 @@ const getRequiredQuantity = (item) => {
   return Number.isFinite(value) ? value : 0;
 };
 
+const getItemCategory = (item) => {
+  const summary = String(item?.summary || "").trim().toLowerCase();
+
+  if (summary === "sample request") {
+    return "SAMPLE";
+  }
+
+  if (summary === "custom cutting") {
+    return "PERSONALIZATION";
+  }
+
+  return "REGULAR";
+};
+
+const getOrderItemSummary = (items = []) => {
+  const counts = items.reduce(
+    (summary, item) => {
+      summary[getItemCategory(item)] += 1;
+
+      return summary;
+    },
+    { SAMPLE: 0, PERSONALIZATION: 0, REGULAR: 0 },
+  );
+
+  return [
+    counts.SAMPLE ? `S${counts.SAMPLE}` : "",
+    counts.PERSONALIZATION ? `P${counts.PERSONALIZATION}` : "",
+    counts.REGULAR ? `R${counts.REGULAR}` : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+};
+
+const formatPersonalizationQuantity = (item) => {
+  if (getItemCategory(item) !== "PERSONALIZATION") {
+    return item?.quantity ?? 0;
+  }
+
+  const personalization = String(item?.personalization || "");
+  const dimensions = personalization.match(
+    /=\s*(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)/i,
+  );
+
+  if (!dimensions) {
+    return item?.quantity ?? 0;
+  }
+
+  return `${dimensions[2]}M x ${dimensions[1]}`;
+};
+
+const getDymoQuantity = (item) => {
+  const category = getItemCategory(item);
+
+  if (category === "SAMPLE") {
+    return "S";
+  }
+
+  if (category === "PERSONALIZATION") {
+    return formatPersonalizationQuantity(item);
+  }
+
+  return item?.quantity ?? 0;
+};
+
 const isInsufficientStock = (item) =>
   getRequiredQuantity(item) > getAvailableStock(item);
 
@@ -467,7 +531,6 @@ const OrderBatchDetailTab = ({
     () =>
       labelItems.filter(
         (item) =>
-          item?.lable_printed !== true &&
           item?.processing_status !== "COMPLETED" &&
           item?.processing_status_display !== "Completed",
       ),
@@ -673,7 +736,7 @@ const OrderBatchDetailTab = ({
 
       setDymoValue(label, objectNames, "TEXT", item?.product_name || "");
 
-      setDymoValue(label, objectNames, "TEXT2", item?.quantity ?? 0);
+      setDymoValue(label, objectNames, "TEXT2", getDymoQuantity(item));
 
       setDymoValue(label, objectNames, "TEXT3",  "WEB");
 
@@ -1563,7 +1626,9 @@ const OrderBatchDetailTab = ({
                 >
                   {printing
                     ? "Printing DYMO Labels..."
-                    : `Print DYMO Labels (${printableItems.length})`}
+                    : printableItems.some((item) => item?.lable_printed === true)
+                      ? `Reprint DYMO Labels (${printableItems.length})`
+                      : `Print DYMO Labels (${printableItems.length})`}
                 </Button>
               </Stack>
             </Paper>
@@ -1657,7 +1722,10 @@ const OrderBatchDetailTab = ({
                         <TableCell>{order.order_source || "-"}</TableCell>
 
                         <TableCell>
-                          {order.item_count ?? order.items_total ?? 0}
+                          {getOrderItemSummary(orderItems) ||
+                            order.item_count ||
+                            order.items_total ||
+                            0}
                         </TableCell>
 
                         <TableCell>
@@ -1778,12 +1846,18 @@ const OrderBatchDetailTab = ({
                             <Chip
                               size="small"
                               label={
-                                Number(item.item_count || 0) > 1 ? "M" : "S"
+                                getItemCategory(item) === "SAMPLE"
+                                  ? "Sample"
+                                  : getItemCategory(item) === "PERSONALIZATION"
+                                    ? "Personalization"
+                                    : "Regular"
                               }
                               color={
-                                Number(item.item_count || 0) > 1
+                                getItemCategory(item) === "SAMPLE"
                                   ? "secondary"
-                                  : "default"
+                                  : getItemCategory(item) === "PERSONALIZATION"
+                                    ? "warning"
+                                    : "default"
                               }
                             />
                           </TableCell>
@@ -1822,7 +1896,9 @@ const OrderBatchDetailTab = ({
                             </Tooltip>
                           </TableCell>
 
-                          <TableCell>{item.quantity ?? 0}</TableCell>
+                          <TableCell>
+                            {formatPersonalizationQuantity(item)}
+                          </TableCell>
 
                           <TableCell>
                             <Tooltip
