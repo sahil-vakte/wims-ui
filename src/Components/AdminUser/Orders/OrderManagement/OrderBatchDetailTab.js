@@ -3,6 +3,7 @@ import {
   Alert,
   Box,
   Button,
+  Checkbox,
   Chip,
   CircularProgress,
   FormControl,
@@ -92,6 +93,17 @@ const getItemCategory = (item) => {
 
   return "REGULAR";
 };
+
+const getProductKey = (item) =>
+  String(
+    item?.sku ||
+      item?.product_id ||
+      item?.product ||
+      item?.product_name ||
+      "",
+  )
+    .trim()
+    .toLowerCase();
 
 const getOrderItemSummary = (items = []) => {
   const counts = items.reduce(
@@ -252,6 +264,9 @@ const OrderBatchDetailTab = ({
 
   // Internal detail view: show either Orders or Labels.
   const [detailContentTab, setDetailContentTab] = useState(0);
+  const [labelView, setLabelView] = useState("ALL");
+  const [dymoPrintMode, setDymoPrintMode] = useState("SIMILAR_PRODUCT");
+  const [selectedLabelIds, setSelectedLabelIds] = useState([]);
 
   const [printers, setPrinters] = useState([]);
   const [selectedPrinter, setSelectedPrinter] = useState("");
@@ -537,6 +552,93 @@ const OrderBatchDetailTab = ({
     [labelItems],
   );
 
+  const displayedLabelGroups = useMemo(() => {
+    if (labelView === "ALL") {
+      return [{ key: "all", label: "", items: labelItems }];
+    }
+
+    const groups = new Map();
+
+    labelItems.forEach((item) => {
+      const key =
+        labelView === "BY_ORDER"
+          ? String(item?.order_id || "unknown-order")
+          : getProductKey(item) || "unknown-product";
+
+      if (!groups.has(key)) {
+        groups.set(key, {
+          key,
+          label:
+            labelView === "BY_ORDER"
+              ? item?.external_order_id || item?.order_number || `#${key}`
+              : `${item?.sku || "No SKU"} - ${item?.product_name || "Unknown product"}`,
+          items: [],
+        });
+      }
+
+      groups.get(key).items.push(item);
+    });
+
+    return Array.from(groups.values());
+  }, [labelItems, labelView]);
+
+  const displayedLabelItems = useMemo(
+    () => displayedLabelGroups.flatMap((group) => group.items),
+    [displayedLabelGroups],
+  );
+
+  const dymoItemsToPrint = useMemo(() => {
+    const groups = new Map();
+
+    printableItems.forEach((item) => {
+      const key =
+        dymoPrintMode === "BY_ORDER"
+          ? String(item?.order_id || "unknown-order")
+          : getProductKey(item) || "unknown-product";
+
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+
+      groups.get(key).push(item);
+    });
+
+    return Array.from(groups.values()).flat();
+  }, [dymoPrintMode, printableItems]);
+
+  const selectableDisplayedItems = useMemo(
+    () => displayedLabelItems.filter((item) => printableItems.includes(item)),
+    [displayedLabelItems, printableItems],
+  );
+
+  const allDisplayedItemsSelected =
+    selectableDisplayedItems.length > 0 &&
+    selectableDisplayedItems.every((item) =>
+      selectedLabelIds.includes(String(item.id)),
+    );
+
+  const toggleLabelSelection = (itemId) => {
+    const value = String(itemId);
+
+    setSelectedLabelIds((current) =>
+      current.includes(value)
+        ? current.filter((id) => id !== value)
+        : [...current, value],
+    );
+  };
+
+  const toggleDisplayedSelection = (event) => {
+    const displayedIds = selectableDisplayedItems.map((item) => String(item.id));
+
+    setSelectedLabelIds((current) => {
+      if (event.target.checked) {
+        return [...new Set([...current, ...displayedIds])];
+      }
+
+      return current.filter((id) => !displayedIds.includes(id));
+    });
+  };
+
   const buildQrUrl = useCallback((item) => {
     /*
      * IMPORTANT QR BEHAVIOUR
@@ -720,10 +822,7 @@ const OrderBatchDetailTab = ({
 
       const dateValue = Number.isNaN(printTime.getTime())
         ? ""
-        : `${batchName || ""} | ${printTime.toLocaleString("en-GB", {
-            day: "2-digit",
-            month: "long",
-            year: "numeric",
+        : `${batchName || ""} | ${printTime.toLocaleTimeString("en-GB", {
             hour: "2-digit",
             minute: "2-digit",
             hour12: false,
@@ -1208,7 +1307,7 @@ const OrderBatchDetailTab = ({
     return true;
   };
 
-  const printBatch = async () => {
+  const printBatch = async (itemsToPrint = dymoItemsToPrint) => {
     /*
      * DYMO printing is completely independent from the A4 printer.
      */
@@ -1217,7 +1316,7 @@ const OrderBatchDetailTab = ({
       return;
     }
 
-    if (!printableItems.length) {
+    if (!itemsToPrint.length) {
       setError("There are no pending DYMO labels to print in this batch.");
       return;
     }
@@ -1231,11 +1330,11 @@ const OrderBatchDetailTab = ({
 
       const successfulItemIds = [];
 
-      for (let index = 0; index < printableItems.length; index += 1) {
-        const item = printableItems[index];
+      for (let index = 0; index < itemsToPrint.length; index += 1) {
+        const item = itemsToPrint[index];
 
         setMessage(
-          `Preparing DYMO label ${index + 1} of ${printableItems.length}: ${
+          `Preparing DYMO label ${index + 1} of ${itemsToPrint.length}: ${
             item?.sku || item?.external_order_id || item?.id
           }`,
         );
@@ -1610,6 +1709,21 @@ const OrderBatchDetailTab = ({
                   {connecting ? "Connecting..." : "Reconnect DYMO"}
                 </Button>
 
+                <FormControl size="small" sx={{ minWidth: 230 }}>
+                  <InputLabel>Print labels by</InputLabel>
+                  <Select
+                    value={dymoPrintMode}
+                    label="Print labels by"
+                    disabled={connecting || printing}
+                    onChange={(event) => setDymoPrintMode(event.target.value)}
+                  >
+                    <MenuItem value="SIMILAR_PRODUCT">
+                      By Similar Products
+                    </MenuItem>
+                    <MenuItem value="BY_ORDER">By Order</MenuItem>
+                  </Select>
+                </FormControl>
+
                 <Button
                   variant="contained"
                   color="success"
@@ -1618,7 +1732,7 @@ const OrderBatchDetailTab = ({
                     printing ||
                     connecting ||
                     !selectedPrinter ||
-                    !printableItems.length
+                    !dymoItemsToPrint.length
                   }
                   startIcon={
                     printing ? (
@@ -1629,9 +1743,35 @@ const OrderBatchDetailTab = ({
                   {printing
                     ? "Printing DYMO Labels..."
                     : printableItems.some((item) => item?.lable_printed === true)
-                      ? `Reprint DYMO Labels (${printableItems.length})`
-                      : `Print DYMO Labels (${printableItems.length})`}
+                      ? `Reprint DYMO Labels (${dymoItemsToPrint.length})`
+                      : `Print DYMO Labels (${dymoItemsToPrint.length})`}
                 </Button>
+
+                  <Button
+                    variant="outlined"
+                    color="success"
+                    onClick={() =>
+                      printBatch(
+                        dymoItemsToPrint.filter((item) =>
+                          selectedLabelIds.includes(String(item.id)),
+                        ),
+                      )
+                    }
+                    disabled={
+                      printing ||
+                      connecting ||
+                      !selectedPrinter ||
+                      !selectedLabelIds.some((id) =>
+                        dymoItemsToPrint.some((item) => String(item.id) === id),
+                      )
+                    }
+                  >
+                    Print Selected (
+                      {selectedLabelIds.filter((id) =>
+                        dymoItemsToPrint.some((item) => String(item.id) === id),
+                      ).length}
+                    )
+                  </Button>
               </Stack>
             </Paper>
 
@@ -1797,6 +1937,42 @@ const OrderBatchDetailTab = ({
 
             {detailContentTab === 1 && (
               <Box>
+            <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+              <Stack
+                direction={{ xs: "column", md: "row" }}
+                spacing={1.5}
+                alignItems={{ xs: "stretch", md: "center" }}
+                flexWrap="wrap"
+                useFlexGap
+              >
+                <FormControl size="small" sx={{ minWidth: 220 }}>
+                  <InputLabel>Show labels by</InputLabel>
+                  <Select
+                    value={labelView}
+                    label="Show labels by"
+                    disabled={printing}
+                    onChange={(event) => setLabelView(event.target.value)}
+                  >
+                    <MenuItem value="ALL">All labels</MenuItem>
+                    <MenuItem value="BY_ORDER">By order, one after another</MenuItem>
+                    <MenuItem value="SIMILAR_PRODUCT">By similar products</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={toggleDisplayedSelection}
+                  disabled={!selectableDisplayedItems.length || printing}
+                >
+                  {allDisplayedItemsSelected ? "Clear visible" : "Select visible"}
+                </Button>
+
+                <Typography variant="body2" color="text.secondary">
+                  Showing {displayedLabelItems.length} label(s) | Selected {selectedLabelIds.length}
+                </Typography>
+              </Stack>
+            </Paper>
             <TableContainer
               component={Paper}
               variant="outlined"
@@ -1805,6 +1981,22 @@ const OrderBatchDetailTab = ({
               <Table size="small" stickyHeader>
                 <TableHead>
                   <TableRow>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        size="small"
+                        checked={allDisplayedItemsSelected}
+                        indeterminate={
+                          selectedLabelIds.some((id) =>
+                            selectableDisplayedItems.some(
+                              (item) => String(item.id) === id,
+                            ),
+                          ) && !allDisplayedItemsSelected
+                        }
+                        onChange={toggleDisplayedSelection}
+                        disabled={!selectableDisplayedItems.length || printing}
+                        inputProps={{ "aria-label": "Select visible labels" }}
+                      />
+                    </TableCell>
                     <TableCell>Order</TableCell>
                     <TableCell>Type</TableCell>
                     <TableCell>Product</TableCell>
@@ -1817,8 +2009,20 @@ const OrderBatchDetailTab = ({
                 </TableHead>
 
                 <TableBody>
-                  {labelItems.length ? (
-                    labelItems.map((item) => {
+                  {displayedLabelItems.length ? (
+                    displayedLabelGroups.flatMap((group) => [
+                      ...(group.label
+                        ? [
+                            <TableRow key={`group-${group.key}`}>
+                              <TableCell colSpan={9} sx={{ bgcolor: "action.hover" }}>
+                                <Typography fontWeight={700}>
+                                  {labelView === "BY_ORDER" ? "Order" : "Product"}: {group.label}
+                                </Typography>
+                              </TableCell>
+                            </TableRow>,
+                          ]
+                        : []),
+                      ...group.items.map((item) => {
                       const insufficient = isInsufficientStock(item);
 
                       const low = isLowStock(item);
@@ -1827,7 +2031,7 @@ const OrderBatchDetailTab = ({
 
                       const required = getRequiredQuantity(item);
 
-                      return (
+                        return (
                         <TableRow
                           key={item.id}
                           hover
@@ -1836,6 +2040,17 @@ const OrderBatchDetailTab = ({
                             
                           }}
                         >
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              size="small"
+                              checked={selectedLabelIds.includes(String(item.id))}
+                              onChange={() => toggleLabelSelection(item.id)}
+                              disabled={!printableItems.includes(item) || printing}
+                              inputProps={{
+                                "aria-label": `Select label ${item.sku || item.id}`,
+                              }}
+                            />
+                          </TableCell>
                           <TableCell>
                             <Typography fontWeight={700}>
                               {item.external_order_id ||
@@ -1972,11 +2187,12 @@ const OrderBatchDetailTab = ({
                             />
                           </TableCell>
                         </TableRow>
-                      );
-                    })
+                        );
+                      }),
+                    ])
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={8} align="center">
+                      <TableCell colSpan={9} align="center">
                         No labels found.
                       </TableCell>
                     </TableRow>
