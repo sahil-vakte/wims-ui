@@ -34,6 +34,8 @@ import tialogoo from "../../../../Assets/TK_Logo_png.png";
 import Qrimagee from "../../../../Assets/reviewQR.jpeg";
 import Bannerimagee from "../../../../Assets/Packing_Banner.jpg.jpeg";
 
+import BatchShipmentBooking from "./BatchShipmentBooking";
+
 const BATCH_API = "order-batches/";
 const DYMO_LABEL_TEMPLATE = `${process.env.PUBLIC_URL}/labels/tiaknight-product-label-fixed.dymo`;
 
@@ -1803,12 +1805,17 @@ const OrderBatchDetailTab = ({
               </Tabs>
             </Paper>
 
-            {detailContentTab === 0 && (
-              <Box>
+            <Box sx={{ display: detailContentTab === 0 ? "block" : "none" }}>
+              <BatchShipmentBooking key={batchId} orders={detail?.orders || []} headers={headers}
+                onOrderUpdated={(updated) => setDetail((current) => ({ ...current,
+                  orders: (current?.orders || []).map((order) => order.id === updated.id ? { ...order, ...updated } : order),
+                }))}
+                renderOrders={({ selectionCell, shipmentCell }) => (
             <TableContainer component={Paper} variant="outlined">
               <Table size="small">
                 <TableHead>
                   <TableRow>
+                    <TableCell padding="checkbox">Select</TableCell>
                     <TableCell>Order</TableCell>
                     <TableCell>Customer</TableCell>
                     <TableCell>Courier</TableCell>
@@ -1816,6 +1823,7 @@ const OrderBatchDetailTab = ({
                     <TableCell>Items</TableCell>
                     <TableCell>Stock</TableCell>
                     <TableCell>Progress</TableCell>
+                    <TableCell>Shipment</TableCell>
                   </TableRow>
                 </TableHead>
 
@@ -1842,6 +1850,7 @@ const OrderBatchDetailTab = ({
                           bgcolor: "transparent",
                         }}
                       >
+                        <TableCell padding="checkbox">{selectionCell(order)}</TableCell>
                         <TableCell>
                           <Typography fontWeight={700}>
                             {order.external_order_id ||
@@ -1925,6 +1934,7 @@ const OrderBatchDetailTab = ({
                             }
                           />
                         </TableCell>
+                        <TableCell>{shipmentCell(order)}</TableCell>
                       </TableRow>
                     );
                   })}
@@ -1932,8 +1942,8 @@ const OrderBatchDetailTab = ({
               </Table>
             </TableContainer>
 
-              </Box>
-            )}
+                )} />
+            </Box>
 
             {detailContentTab === 1 && (
               <Box>

@@ -1746,7 +1746,7 @@ const labelXml = replaceQrValueInDymoXml(
         label,
         objectNames,
         "TEXT",
-        item?.product_name || ""
+        item?.short_title || ""
       );
 
       // The uploaded template maps TEXT2 to Qty.

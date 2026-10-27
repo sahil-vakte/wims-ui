@@ -1998,7 +1998,7 @@
 // export default OrdersList;
 
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   Box,
@@ -2042,7 +2042,6 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import PrintIcon from "@mui/icons-material/Print";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 import { QRCodeCanvas } from "qrcode.react";
 
@@ -2309,18 +2308,27 @@ const buildQrUrl = (orderId, itemId, childProductUrl) => {
 |--------------------------------------------------------------------------
 */
 
-const canPrintOrder = (order) => {
-  const status = String(order?.order_status || "").toUpperCase();
-
-  return status === "SHIPPED" && Boolean(order?.public_shipping_label_url);
+const shippingProvider = (order) => {
+  const service = order?.shipping_service;
+  if (service?.provider === "DPD") return "DPD";
+  const provider = String(service?.provider || "").toUpperCase().replace(/[ _-]/g, "");
+  if (provider === "ROYALMAIL") return "Royal Mail";
+  if (service?.booking_url === `/api/v1/orders/${order?.id}/book-royal-mail-shipping/`) return "Royal Mail";
+  return "";
 };
+const publicLabelUrl = (order) => order?.public_label_url || order?.public_shipping_label_url;
+const shipmentBooked = (order) => Boolean(order?.shipment_booked || publicLabelUrl(order)) ||
+  String(order?.order_status || order?.status || "").toUpperCase() === "SHIPPED";
+// DPD labels can be HTML; use the browser action instead of the PDF printer.
+const canPrintOrder = (order) => shipmentBooked(order) && Boolean(publicLabelUrl(order)) &&
+  shippingProvider(order) !== "DPD" && order?.carrier !== "DPD" && order?.label_format !== "html";
 
 const getBookingState = (order) => {
   /*
    * Existing application behaviour considers an order booked when
    * it is SHIPPED and has a public shipping label.
    */
-  if (canPrintOrder(order)) {
+  if (shipmentBooked(order)) {
     return "BOOKED";
   }
 
@@ -2406,6 +2414,10 @@ const OrdersList = () => {
   const [shippingNotes, setShippingNotes] = useState(
     "Booked through Royal Mail Click & Drop API",
   );
+  const bookingLock = useRef(false);
+  const [shippingLoading, setShippingLoading] = useState(false);
+  const [dpdReady, setDpdReady] = useState(false);
+  const provider = shippingProvider(shippingOrder);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingError, setBookingError] = useState("");
   const [bookingSuccess, setBookingSuccess] = useState("");
@@ -2641,80 +2653,112 @@ const OrdersList = () => {
   |--------------------------------------------------------------------------
   */
 
-  const openShippingDialog = (order) => {
+  const readShippingOrder = async (id) => {
+    const response = await ApiServices.get(`orders/${id}/`, headers);
+    if (response.error) throw response.error;
+    if (!response.data) throw new Error("Unable to load the shipping decision.");
+    return { ...response.data, order_status: response.data.order_status || response.data.status };
+  };
+
+  const updateShippingOrder = (order) => {
     setShippingOrder(order);
+    setOrders((current) => current.map((existing) => existing.id === order.id ? { ...existing, ...order } : existing));
+  };
+
+  const openShippingDialog = async (order) => {
+    if (bookingLock.current || shippingLoading) return;
+    setShippingOrder(null);
     setPackageFormat("Letter");
-    setShippingNotes("Booked through Royal Mail Click & Drop API");
+    setShippingNotes("Booked from WIMS");
     setBookingError("");
     setBookingSuccess("");
+    setDpdReady(false);
+    setShippingLoading(true);
     setShippingDialogOpen(true);
+    try {
+      const detail = { ...order, ...await readShippingOrder(order.id) };
+      updateShippingOrder(detail);
+      if (shippingProvider(detail) === "DPD" && !shipmentBooked(detail)) {
+        const config = await ApiServices.get("orders/dpd/config/", headers);
+        if (config.error) throw config.error;
+        setDpdReady(config.data?.booking_enabled === true);
+        if (config.data?.booking_enabled !== true) setBookingError(config.data?.message || "DPD booking is disabled.");
+      } else if (!shippingProvider(detail) && !shipmentBooked(detail)) {
+        setBookingError("The backend has not returned a supported shipping provider for this order.");
+      }
+    } catch (err) {
+      setBookingError(err?.response?.data?.message || err.message || "Unable to load shipping details.");
+    } finally {
+      setShippingLoading(false);
+    }
   };
 
   const closeShippingDialog = () => {
-    if (bookingLoading) {
-      return;
-    }
-
+    if (bookingLock.current || shippingLoading) return;
     setShippingDialogOpen(false);
     setShippingOrder(null);
   };
 
-  const handleBookRoyalMailShipping = async () => {
-    if (!shippingOrder) {
-      return;
-    }
-
+  const handleBookShipping = async () => {
+    if (bookingLock.current || shippingLoading || !shippingOrder || shipmentBooked(shippingOrder) || !provider) return;
+    if (Number(shippingOrder.completion_percentage) !== 100) return;
+    const isDpd = provider === "DPD";
+    if (isDpd && !dpdReady) return;
     const weight = Number(shippingOrder.total_weight_gm || 0);
-
-    if (!weight || weight <= 0) {
-      setBookingError("Weight is required and must be greater than 0.");
+    const serviceCode = shippingOrder.shipping_service?.service_code || shippingOrder.courier_service_code;
+    if (!isDpd && (!Number.isFinite(weight) || weight <= 0 || !packageFormat || !serviceCode)) {
+      setBookingError("Positive weight, package format and courier service code are required.");
       return;
     }
-
-    if (!packageFormat) {
-      setBookingError("Please select package format.");
-      return;
-    }
-
-    if (!shippingOrder.courier_service_code) {
-      setBookingError("Courier service code is missing.");
-      return;
-    }
-
-    const payload = {
-      weight_in_grams: weight,
-      package_format_identifier: packageFormat,
-      service_code: shippingOrder.courier_service_code,
-      notes: shippingNotes || "",
-    };
-
+    bookingLock.current = true;
+    setBookingLoading(true);
+    setBookingError("");
+    setBookingSuccess("");
     try {
-      setBookingLoading(true);
-      setBookingError("");
-      setBookingSuccess("");
-
-      await ApiServices.post(
-        `orders/${shippingOrder.id}/book-royal-mail-shipping/`,
-        payload,
-        headers,
+      const payload = isDpd ? { return_label_pdf: false, notes: shippingNotes || "" } : {
+        weight_in_grams: weight, package_format_identifier: packageFormat,
+        service_code: serviceCode, notes: shippingNotes || "",
+      };
+      const response = await ApiServices.post(
+        `orders/${shippingOrder.id}/${isDpd ? "book-dpd-shipping" : "book-royal-mail-shipping"}/`, payload, headers,
       );
-
-      setBookingSuccess("Royal Mail shipping booked successfully.");
-
-      await fetchOrders(paginationModel.page);
-
-      setTimeout(() => {
-        closeShippingDialog();
-      }, 700);
+      const data = response.data || {};
+      const booked = {
+        ...shippingOrder, ...data.order,
+        order_status: data.order?.order_status || data.order?.status || "SHIPPED",
+        shipment_booked: true,
+        tracking_number: data.tracking_number || shippingOrder.tracking_number,
+        courier_service_code: data.service_code || serviceCode,
+        public_shipping_label_url: data.public_label_url || publicLabelUrl(data.order) || publicLabelUrl(shippingOrder),
+        label_format: data.label_format,
+        shipping_service: { ...shippingOrder.shipping_service, service_code: data.service_code || serviceCode },
+      };
+      updateShippingOrder(booked);
+      if (!publicLabelUrl(booked)) {
+        try {
+          updateShippingOrder({ ...booked, ...await readShippingOrder(shippingOrder.id), shipment_booked: true });
+        } catch (reloadError) {
+          setBookingError("Booking succeeded, but the label could not be loaded. Reopen the shipment to retrieve it.");
+        }
+      }
+      setBookingSuccess(data.message || `${provider} shipping booked successfully.`);
     } catch (err) {
-      console.error(err);
-
-      setBookingError(
-        err?.response?.data?.detail ||
-          err?.response?.data?.message ||
-          "Failed to book Royal Mail shipping.",
-      );
+      const data = err?.response?.data;
+      console.error("Shipping booking failed", data || err);
+      if (err?.response?.status === 409) {
+        const booked = { ...shippingOrder, shipment_booked: true, tracking_number: data?.tracking_number || shippingOrder.tracking_number };
+        updateShippingOrder(booked);
+        try {
+          updateShippingOrder({ ...booked, ...await readShippingOrder(shippingOrder.id), shipment_booked: true });
+          setBookingSuccess("Shipment already booked. Use the existing label.");
+        } catch (reloadError) {
+          setBookingError("Shipment already booked. Reload the order to retrieve its existing label.");
+        }
+      } else {
+        setBookingError([data?.error, data?.message, data?.detail].filter(Boolean).join(" ? ") || err.message || "Shipping booking failed.");
+      }
     } finally {
+      bookingLock.current = false;
       setBookingLoading(false);
     }
   };
@@ -3216,32 +3260,12 @@ const OrdersList = () => {
       filterable: false,
 
       renderCell: ({ row }) => {
-        const printable = canPrintOrder(row.raw);
-
-        if (printable) {
-          return (
-            <Button
-              variant="contained"
-              size="small"
-              disabled
-              disableElevation
-              startIcon={<CheckCircleIcon />}
-              sx={{
-                textTransform: "none",
-                fontWeight: 600,
-                whiteSpace: "nowrap",
-                borderRadius: 1.5,
-
-                "&.Mui-disabled": {
-                  backgroundColor: "#16a34a",
-                  color: "#ffffff",
-                  opacity: 1,
-                },
-              }}
-            >
-              Order Booked
+        if (shipmentBooked(row.raw)) {
+          return publicLabelUrl(row.raw) ? (
+            <Button component="a" href={publicLabelUrl(row.raw)} target="_blank" rel="noopener noreferrer" size="small">
+              Open / Print Label
             </Button>
-          );
+          ) : <Button size="small" onClick={() => openShippingDialog(row.raw)}>View Shipment</Button>;
         }
 
         const isCompleted = Number(row.completion_percentage) === 100;
@@ -3274,7 +3298,7 @@ const OrdersList = () => {
             }}
             onClick={() => openShippingDialog(row.raw)}
           >
-            {isCompleted ? "Book Shipping" : "Not Available to Book"}
+            {isCompleted ? `Book ${shippingProvider(row.raw) || "Shipping"}` : "Not Available to Book"}
           </Button>
         );
       },
@@ -3710,14 +3734,15 @@ const OrdersList = () => {
         fullScreen={isMobile}
         PaperProps={{ sx: { borderRadius: { xs: 0, sm: 3 } } }}
       >
-        <DialogTitle fontWeight={700}>Confirm Royal Mail Shipping</DialogTitle>
+        <DialogTitle fontWeight={700}>{provider ? `${provider} Shipping` : "Shipping"}</DialogTitle>
 
         <DialogContent dividers>
+          {shippingLoading && <CircularProgress size={24} />}
+          {!shippingOrder && bookingError && <Alert severity="error">{bookingError}</Alert>}
           {shippingOrder && (
             <Box sx={{ display: "grid", gap: 2, minWidth: 0 }}>
               <Alert severity="info">
-                Please verify package details before booking Royal Mail
-                shipping.
+                Please verify the shipping service selected by WIMS before booking.
               </Alert>
 
               {bookingError && <Alert severity="error">{bookingError}</Alert>}
@@ -3730,20 +3755,24 @@ const OrdersList = () => {
 
               <InfoRow
                 label="Weight"
-                value={`${shippingOrder.total_weight_gm || 0} grams`}
+                value={`${shippingOrder.shipping_service?.weight_in_grams ?? shippingOrder.total_weight_gm ?? 0} grams`}
               />
 
               <InfoRow
                 label="Service Code"
-                value={shippingOrder.courier_service_code || "NA"}
+                value={shippingOrder.shipping_service?.service_code || shippingOrder.courier_service_code || "NA"}
               />
 
               <InfoRow
                 label="Courier"
-                value={shippingOrder.courier_service_name || "NA"}
+                value={provider || "Unavailable"}
               />
 
-              <TextField
+              <InfoRow label="Delivery method" value={shippingOrder.shipping_service?.delivery_method || "NA"} />
+              <InfoRow label="Shipment type" value={shippingOrder.shipping_service?.shipment_type || "NA"} />
+              {shippingOrder.tracking_number && <InfoRow label="Tracking" value={shippingOrder.tracking_number} />}
+              {publicLabelUrl(shippingOrder) && <Button component="a" href={publicLabelUrl(shippingOrder)} target="_blank" rel="noopener noreferrer">Open / Print Label</Button>}
+              {provider === "Royal Mail" && !shipmentBooked(shippingOrder) && <TextField
                 select
                 fullWidth
                 size="small"
@@ -3754,7 +3783,7 @@ const OrdersList = () => {
                 <MenuItem value="Large">Large</MenuItem>
                 <MenuItem value="Letter">Letter</MenuItem>
                 <MenuItem value="Parcel">Parcel</MenuItem>
-              </TextField>
+              </TextField>}
 
               <TextField
                 fullWidth
@@ -3772,7 +3801,7 @@ const OrdersList = () => {
         <DialogActions sx={{ px: 3, py: 2 }}>
           <Button
             onClick={closeShippingDialog}
-            disabled={bookingLoading}
+            disabled={bookingLoading || shippingLoading}
             sx={{ textTransform: "none" }}
           >
             Cancel
@@ -3781,8 +3810,8 @@ const OrdersList = () => {
           <Button
             variant="contained"
             disableElevation
-            onClick={handleBookRoyalMailShipping}
-            disabled={bookingLoading}
+            onClick={handleBookShipping}
+            disabled={bookingLoading || shippingLoading || !provider || shipmentBooked(shippingOrder) || Number(shippingOrder?.completion_percentage) !== 100 || (provider === "DPD" && !dpdReady)}
             sx={{
               textTransform: "none",
               fontWeight: 600,
