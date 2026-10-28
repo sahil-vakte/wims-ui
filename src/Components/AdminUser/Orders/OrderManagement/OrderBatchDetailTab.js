@@ -132,8 +132,17 @@ const formatPersonalizationQuantity = (item) => {
   }
 
   const personalization = String(item?.personalization || "");
+  // Explicit units identify the length: "5 metres x 3" means 3 cuts of 5m.
+  const lengthFirst = personalization.match(
+    /=\s*(\d+(?:\.\d+)?)\s*(?:metres?|meters?|m)\s*[x×]\s*(\d+(?:\.\d+)?)/i,
+  );
+  if (lengthFirst) {
+    return `${lengthFirst[1]}M x ${lengthFirst[2]}`;
+  }
+
+  // Preserve the existing count-first format: "3 x 5" or "3 x 5 metres".
   const dimensions = personalization.match(
-    /=\s*(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)/i,
+    /=\s*(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)/i,
   );
 
   if (!dimensions) {
@@ -832,7 +841,7 @@ const OrderBatchDetailTab = ({
 
       setDymoValue(label, objectNames, "QR Code", buildQrUrl(item));
 
-      setDymoValue(label, objectNames, "TEXT", item?.product_name || "");
+      setDymoValue(label, objectNames, "TEXT", item?.short_title || "");
 
       setDymoValue(label, objectNames, "TEXT2", getDymoQuantity(item));
 

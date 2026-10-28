@@ -41,7 +41,8 @@ export default function BatchShipmentBooking({ orders, headers, onOrderUpdated, 
   const [notes, setNotes] = useState("Booked from WIMS batch");
   const lock = useRef(false);
   const [printStatus, setPrintStatus] = useState(null);
-  const bookingIds = orders.filter((order) => selected.includes(order.id) && !isBooked(order)).map((order) => order.id);
+  const unbookedIds = orders.filter((order) => !isBooked(order)).map((order) => order.id);
+  const bookingIds = unbookedIds.filter((id) => selected.includes(id));
   const printableOrders = orders.filter((order) => isBooked(order) && labelUrl(order));
   const selectedPrintable = printableOrders.filter((order) => selected.includes(order.id));
   const printSelected = async () => {
@@ -190,6 +191,7 @@ export default function BatchShipmentBooking({ orders, headers, onOrderUpdated, 
       </Button>
     </Stack>
     <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+      <Button disabled={busy || !unbookedIds.length} onClick={() => setSelected(unbookedIds)}>Select all unbooked orders ({unbookedIds.length})</Button>
       <Button disabled={busy || !printableOrders.length} onClick={() => setSelected(printableOrders.map((order) => order.id))}>Select all booked labels</Button>
       <Button disabled={busy || !selected.length} onClick={() => setSelected([])}>Clear selection</Button>
       <Button variant="contained" disabled={busy || !selectedPrintable.length} onClick={printSelected}>Print selected shipment labels ({selectedPrintable.length})</Button>

@@ -604,7 +604,7 @@ const OrderBatchDetailDialog = ({
 
       setDymoValue(label, objectNames, "QR Code", buildQrUrl(item));
 
-      setDymoValue(label, objectNames, "TEXT", item?.product_name || "");
+      setDymoValue(label, objectNames, "TEXT", item?.short_title || "");
 
       setDymoValue(label, objectNames, "TEXT2", item?.quantity ?? 0);
 
